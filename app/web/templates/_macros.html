@@ -32,3 +32,29 @@
   <a class="icon-btn" href="{{ url_for('games.settings') }}" aria-label="Réglages">{{ icon('settings') }}</a>
 </header>
 {%- endmacro %}
+
+{% macro patch_sections(patch, level=2) -%}
+  {% if not patch.sections %}
+  <p class="empty">Le contenu de cette note n'a pas pu être découpé. Consulte la note officielle ci-dessous.</p>
+  {% endif %}
+  {% for s in patch.sections %}
+  <section id="s-{{ s.id }}" class="psection">
+    <h{{ level }}>{{ s.title }}{% if s.count %}<span class="mono muted">{{ s.count }}</span>{% endif %}</h{{ level }}>
+    <ul class="items">
+      {% for it in s['items'] %}
+      {% if it.kind == 'note' %}
+      <li class="item item--note">{{ it.text }}</li>
+      {% else %}
+      <li class="item">
+        <span class="kind kind--{{ it.kind }}">{{ {'fix': 'FIX', 'new': 'NEW', 'balance': 'BAL', 'change': 'CHG'}[it.kind] }}</span>
+        <div>
+          {% if it.subgroup %}<span class="subgroup">{{ it.subgroup }}</span>{% endif %}
+          <span class="item__text">{{ it.text }}</span>
+        </div>
+      </li>
+      {% endif %}
+      {% endfor %}
+    </ul>
+  </section>
+  {% endfor %}
+{%- endmacro %}

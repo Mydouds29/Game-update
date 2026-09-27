@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import app_header, display_title %}
+{% from "_macros.html" import app_header, display_title, meta_line, patch_sections %}
 {% block title %}{% if game %}{{ game.name }} · {% endif %}Game Update{% endblock %}
 {% block header %}{{ app_header() }}{% endblock %}
 {% block content %}
@@ -30,16 +30,17 @@
 {% elif game %}
 <section class="block">
   {% if patches %}
-  <ul class="list">
-    {% for p in patches %}
-    <li>
-      <a class="row" href="{{ url_for('patch.detail', patch_id=p.id) }}">
-        <span class="row__title">{{ display_title(p) }}</span>
-        <span class="muted small nowrap">{{ p | patch_date }}</span>
-      </a>
-    </li>
-    {% endfor %}
-  </ul>
+  {% for p in patches %}
+  <article class="patch-full">
+    <header class="patch-full__head">
+      <h2><a href="{{ url_for('patch.detail', patch_id=p.id) }}">{{ display_title(p) }}</a></h2>
+      <div class="mono muted small">{{ meta_line(p, long_date=true) }}</div>
+      {% if p.version and p.build %}<p class="subtitle">{{ p.title }}</p>{% endif %}
+    </header>
+    {{ patch_sections(p, level=3) }}
+    <a class="patch-full__source" href="{{ p.source_url }}" rel="noopener noreferrer nofollow" target="_blank">Note officielle ({{ p.source_label }}) →</a>
+  </article>
+  {% endfor %}
   {% else %}
   <p class="empty">Aucun patch pour l'instant.</p>
   {% endif %}

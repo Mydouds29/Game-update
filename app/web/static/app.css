@@ -91,8 +91,8 @@ a.card:hover { color: var(--text); }
 .section-nav::-webkit-scrollbar { display: none; }
 .sections { padding: 8px var(--gutter) 0; }
 .psection { padding: 18px 0 6px; scroll-margin-top: 140px; }
-.psection h2 { font-size: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.psection h2 .mono { font-size: 13px; font-weight: 500; }
+.psection h2, .psection h3 { font-size: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.psection :is(h2, h3) .mono { font-size: 13px; font-weight: 500; }
 .items { display: flex; flex-direction: column; gap: 8px; }
 .item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--surface); border-radius: 10px; }
 .item > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -123,6 +123,13 @@ a.card:hover { color: var(--text); }
 .picker select:focus { outline: none; border-color: var(--accent); }
 .picker .btn { min-height: 52px; }
 .block-empty { margin: 20px var(--gutter) 0; }
+.patch-full { padding: 8px 0 24px; border-bottom: 1px solid var(--border); }
+.patch-full + .patch-full { padding-top: 24px; }
+.patch-full__head { display: flex; flex-direction: column; gap: 6px; }
+.patch-full__head h2 { font-size: 28px; line-height: 1.1; overflow-wrap: anywhere; }
+.patch-full__head h2 a { color: var(--text); text-decoration: none; }
+.patch-full__head h2 a:hover { color: var(--accent); }
+.patch-full__source { display: inline-flex; align-items: center; min-height: 44px; margin-top: 8px; font-weight: 600; font-size: 14px; }
 
 /* Grand écran : colonne plus large, sommaire du patch fixé à gauche. */
 @media (min-width: 960px) {

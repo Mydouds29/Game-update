@@ -32,6 +32,9 @@ def test_game_selected_shows_its_patches(client, conn, config):
     assert '<option value="palworld" selected>' in html
     assert "Palworld v0.6.8 Patch Notes" in html
     assert "Hotfix v0.6.7.1 is now live" in html
+    # Contenu complet affiché sous le menu, pas seulement les titres.
+    assert "Fixed a crash when opening the Paldeck on Xbox" in html
+    assert "Fixed a desync when joining a guild base" in html
     assert "Autumn Sale" not in html
     assert "Aucun patch" in client.get("/?game=diablo-4").get_data(as_text=True)
     assert client.get("/?game=inconnu").status_code == 404

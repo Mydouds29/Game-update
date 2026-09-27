@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon, game_tag, display_title, meta_line %}
+{% from "_macros.html" import icon, game_tag, display_title, meta_line, patch_sections %}
 {% block title %}{{ patch.game_name }} · {{ display_title(patch) }}{% endblock %}
 {% block header %}
 <header class="topbar topbar--compact">
@@ -47,29 +47,7 @@
 {% endif %}
 
 <div class="sections">
-  {% if not patch.sections %}
-  <p class="empty">Le contenu de cette note n'a pas pu être découpé. Consulte la note officielle ci-dessous.</p>
-  {% endif %}
-  {% for s in patch.sections %}
-  <section id="s-{{ s.id }}" class="psection">
-    <h2>{{ s.title }}{% if s.count %}<span class="mono muted">{{ s.count }}</span>{% endif %}</h2>
-    <ul class="items">
-      {% for it in s['items'] %}
-      {% if it.kind == 'note' %}
-      <li class="item item--note">{{ it.text }}</li>
-      {% else %}
-      <li class="item">
-        <span class="kind kind--{{ it.kind }}">{{ {'fix': 'FIX', 'new': 'NEW', 'balance': 'BAL', 'change': 'CHG'}[it.kind] }}</span>
-        <div>
-          {% if it.subgroup %}<span class="subgroup">{{ it.subgroup }}</span>{% endif %}
-          <span class="item__text">{{ it.text }}</span>
-        </div>
-      </li>
-      {% endif %}
-      {% endfor %}
-    </ul>
-  </section>
-  {% endfor %}
+  {{ patch_sections(patch) }}
 </div>
 
 <footer class="source">
