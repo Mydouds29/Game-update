@@ -97,8 +97,14 @@ def test_size_limit_and_errors():
         client.get("file:///etc/passwd", check_robots=False)
 
 
-def test_catalog_is_valid():
-    data = load_catalog()
+def test_app_catalog_has_no_undecided_games():
+    # Aucun jeu n'est ajouté sans décision explicite du propriétaire.
+    assert load_catalog()["games"] == []
+
+
+def test_test_catalog_is_valid():
+    from .conftest import FIXTURES
+    data = load_catalog(FIXTURES / "catalog_test.toml")
     assert {g["slug"] for g in data["games"]} >= {"diablo-4", "palworld"}
 
 

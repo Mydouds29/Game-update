@@ -2,10 +2,10 @@
 
 Deux modes, choisis par le paramètre ``mode`` de la source :
 
-* ``anchored_page`` (Diablo IV) : un article unique enrichi à chaque patch,
+* ``anchored_page`` : un article unique enrichi à chaque patch,
   avec un titre par version. La page est découpée par version et chaque
   version devient un patch distinct ; l'ingestion ne crée que les nouvelles.
-* ``news_list`` (Diablo II: Resurrected) : une page de liste d'articles ;
+* ``news_list`` : une page de liste d'articles ;
   chaque article dont le titre ressemble à une patch note est récupéré.
 """
 

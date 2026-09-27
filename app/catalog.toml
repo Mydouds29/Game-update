@@ -1,102 +1,24 @@
-# Catalogue curaté des jeux couverts. Appliqué avec `flask --app app sync-catalog`.
+# Catalogue curaté des jeux couverts. Appliqué avec `flask --app wsgi sync-catalog`.
+#
+# Aucun jeu n'est encore choisi : Frédéric décide de chaque jeu et de sa source
+# avant tout ajout ici.
+#
+# Format d'une entrée (voir tests/fixtures/catalog_test.toml pour des exemples) :
+#
+# [[games]]
+# slug = "mon-jeu"              # minuscules, chiffres et tirets
+# name = "Nom complet du jeu"
+# short_name = "Nom court"      # affiché dans les filtres du fil
+# tag_color = "#RRGGBB"
+#
+#   [[games.sources]]
+#   key = "mon-jeu-steam"       # identifiant stable de la source
+#   type = "steam"              # steam | blizzard | html
+#   label = "Steam"
+#   enabled = true
+#   fetch_interval = 1800       # secondes, minimum 300
+#   params = { appid = 123456 } # à vérifier avec `flask --app wsgi verify-sources`
 #
 # - L'état actif/inactif d'un jeu n'est fixé qu'à sa création : ensuite c'est
 #   l'écran « Jeux » qui décide.
-# - Toute source marquée « À VÉRIFIER » doit être contrôlée depuis le VPS
-#   (`flask --app app verify-sources`) avant d'être activée.
-# - fetch_interval en secondes (minimum 300).
-
-[[games]]
-slug = "diablo-4"
-name = "Diablo IV"
-short_name = "Diablo IV"
-tag_color = "#F29B94"
-
-  [[games.sources]]
-  key = "diablo-4-blizzard"
-  type = "blizzard"
-  label = "Blizzard News"
-  fetch_interval = 3600
-  # À VÉRIFIER : URL reprise de la maquette ; Blizzard change parfois l'ID
-  # d'article de la page de patch notes au lancement d'une extension.
-  params = { mode = "anchored_page", url = "https://news.blizzard.com/en-us/article/24295395/diablo-iv-patch-notes" }
-
-  [[games.sources]]
-  # Doublon possible avec la page Blizzard : désactivé par défaut. La
-  # déduplication par hash de contenu évite les doublons stricts.
-  key = "diablo-4-steam"
-  type = "steam"
-  label = "Steam"
-  enabled = false
-  fetch_interval = 1800
-  params = { appid = 2344520 }
-
-[[games]]
-slug = "palworld"
-name = "Palworld"
-short_name = "Palworld"
-tag_color = "#7FD1C7"
-
-  [[games.sources]]
-  key = "palworld-steam"
-  type = "steam"
-  label = "Steam"
-  fetch_interval = 1800
-  params = { appid = 1623730 }
-
-[[games]]
-slug = "space-marine-2"
-name = "Warhammer 40,000: Space Marine 2"
-short_name = "Space Marine 2"
-tag_color = "#8CC8F2"
-
-  [[games.sources]]
-  key = "space-marine-2-steam"
-  type = "steam"
-  label = "Steam"
-  fetch_interval = 1800
-  params = { appid = 2183900 }
-
-[[games]]
-slug = "total-war-warhammer-3"
-name = "Total War: Warhammer III"
-short_name = "TW:WH3"
-tag_color = "#C9A2F2"
-
-  [[games.sources]]
-  key = "total-war-warhammer-3-steam"
-  type = "steam"
-  label = "Steam"
-  fetch_interval = 1800
-  params = { appid = 1142710 }
-
-[[games]]
-slug = "diablo-2-resurrected"
-name = "Diablo II: Resurrected"
-short_name = "D2R"
-tag_color = "#E6C98A"
-
-  [[games.sources]]
-  key = "diablo-2-resurrected-blizzard"
-  type = "blizzard"
-  label = "Blizzard News"
-  fetch_interval = 3600
-  # À VÉRIFIER : page de liste des news D2R et motif des URLs d'articles.
-  params = { mode = "news_list", list_url = "https://news.blizzard.com/en-us/diablo2", article_url_pattern = "/article/\\d+/", max_articles = 5 }
-
-[[games]]
-slug = "wuthering-waves"
-name = "Wuthering Waves"
-short_name = "Wuthering Waves"
-tag_color = "#9FD68C"
-
-  [[games.sources]]
-  # Source à investiguer : le site officiel est rendu en JavaScript ; il faut
-  # identifier l'API JSON de news qu'il appelle (onglet Réseau du navigateur)
-  # puis renseigner les champs ci-dessous et passer enabled à true.
-  key = "wuthering-waves-site"
-  type = "html"
-  label = "Site officiel"
-  enabled = false
-  fetch_interval = 3600
-  params = { mode = "json_list", list_url = "https://wutheringwaves.kurogames.com/en/main/news/", items_path = "data.list", id_field = "id", title_field = "title", date_field = "publishTime", url_template = "https://wutheringwaves.kurogames.com/en/main/news/detail/{id}", max_articles = 5 }
+# - Un jeu ou une source retiré de ce fichier est désactivé, jamais supprimé.

@@ -55,7 +55,7 @@ def config(tmp_path) -> Config:
 def conn(config):
     c = connect(config.database_path)
     migrate(c)
-    sync_catalog(c, load_catalog())
+    sync_catalog(c, load_catalog(FIXTURES / "catalog_test.toml"))
     yield c
     c.close()
 

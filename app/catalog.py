@@ -38,9 +38,9 @@ def load_catalog(path: Path | None = None) -> dict[str, Any]:
 
 
 def validate_catalog(data: dict[str, Any]) -> None:
-    games = data.get("games")
-    if not isinstance(games, list) or not games:
-        raise CatalogError("le catalogue doit contenir au moins un [[games]]")
+    games = data.setdefault("games", [])
+    if not isinstance(games, list):
+        raise CatalogError("'games' doit être une liste de [[games]]")
     slugs: set[str] = set()
     keys: set[str] = set()
     for game in games:

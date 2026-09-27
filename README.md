@@ -18,7 +18,7 @@ scheduler.py           worker unique, intervalle par source, backoff exponentiel
 web/                   fil filtrable, détail avec navigation par sections, gestion des jeux
 ```
 
-- **Catalogue curaté** : `app/catalog.toml` (jeux, sources, fréquences), appliqué par
+- **Catalogue curaté** : `app/catalog.toml` (jeux, sources, fréquences, vide pour l'instant), appliqué par
   `flask --app wsgi sync-catalog`. L'état actif/inactif se gère ensuite dans l'écran « Jeux ».
 - **Robustesse** : une source en échec est journalisée dans `fetch_log`, reprogrammée
   avec backoff (respect de `Retry-After`), et n'affecte pas les autres.
@@ -53,19 +53,16 @@ Autres commandes : `verify-sources`, `record-fixture <source>`, `notify`,
 Voir [`deploy/README.md`](deploy/README.md) : durcissement du VPS, Tailscale,
 `install.sh`, unités systemd, sauvegardes.
 
-## État des sources (à la livraison)
+## Jeux couverts
 
-| Jeu | Source | État |
-|---|---|---|
-| Diablo IV | Blizzard News, page unique découpée par version | URL de la maquette, **à vérifier** |
-| Diablo IV | Steam 2344520 | désactivée (doublon possible) |
-| Palworld | Steam 1623730 | AppID vérifié |
-| Space Marine 2 | Steam 2183900 | AppID vérifié |
-| Total War: Warhammer III | Steam 1142710 | AppID vérifié |
-| Diablo II: Resurrected | Blizzard News, liste d'articles | URL de liste **à vérifier** |
-| Wuthering Waves | Site officiel (API JSON) | **désactivée**, endpoint à identifier |
+Aucun jeu n'est configuré : `app/catalog.toml` est vide en attendant que les
+jeux et leurs sources soient choisis. Le format d'une entrée est décrit en tête
+du fichier ; `tests/fixtures/catalog_test.toml` contient des exemples utilisés
+uniquement par les tests.
+
+Avant d'activer une source : `flask --app wsgi verify-sources`, puis
+`record-fixture` pour enregistrer une réponse réelle et la tester.
 
 Les parseurs Blizzard et les fixtures de test ont été écrits d'après la structure
-connue de ces pages, sans accès réseau à Steam/Blizzard pendant le développement.
-Lancer `verify-sources` puis `record-fixture` depuis le VPS et ajouter des tests sur
-les réponses réelles (voir `tests/fixtures/README.md`).
+connue de ces pages, sans accès réseau à Steam/Blizzard pendant le développement
+(voir `tests/fixtures/README.md`).
