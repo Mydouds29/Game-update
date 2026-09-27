@@ -53,7 +53,7 @@
   {% endif %}
   {% for s in patch.sections %}
   <section id="s-{{ s.id }}" class="psection">
-    <h{{ level }}>{{ s.title }}{% if s.count %}<span class="mono muted">{{ s.count }}</span>{% endif %}</h{{ level }}>
+    {% if s.title %}<h{{ level }}>{{ s.title }}{% if s.count %}<span class="mono muted">{{ s.count }}</span>{% endif %}</h{{ level }}>{% endif %}
     <ul class="items">
       {% for it in s['items'] %}
       {% if it.kind == 'note' %}

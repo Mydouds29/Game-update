@@ -40,7 +40,7 @@
 
 {% if patch.sections | length > 1 %}
 <nav class="section-nav" aria-label="Sections du patch">
-  {% for s in patch.sections %}
+  {% for s in patch.sections if s.title %}
   <a class="chip chip--small" href="#s-{{ s.id }}">{{ s.title }}{% if s.count %} <span class="mono muted">{{ s.count }}</span>{% endif %}</a>
   {% endfor %}
 </nav>

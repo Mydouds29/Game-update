@@ -86,7 +86,7 @@ def test_news_list_fetches_only_new_patch_articles():
     patch = normalize(result.patches[0])
     assert patch.version == "3.1.2"
     assert patch.published_at.isoformat() == "2026-09-10T17:00:00+00:00"
-    assert [s.title for s in patch.sections] == ["General", "Bug Fixes"]
+    assert [s.title for s in patch.sections] == ["", "Bug Fixes"]
 
 
 def test_news_list_article_failure_does_not_block_others():

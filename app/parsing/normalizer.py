@@ -17,7 +17,9 @@ from ..collectors.blizzard import parse_heading
 MAX_ITEMS = 3000
 MAX_ITEM_CHARS = 4000
 MAX_SUBGROUP_CHARS = 120
-DEFAULT_SECTION = "General"
+# Contenu placé avant le premier titre : section sans titre (aucun titre inventé,
+# le patch note est affiché tel que publié).
+DEFAULT_SECTION = ""
 
 BULLET_RE = re.compile(r"^\s*(?:[-–—•*·▪►]|\d+[.)])\s+")
 CONTAINER_TAGS = {"div", "section", "article", "main", "blockquote", "span", "center",

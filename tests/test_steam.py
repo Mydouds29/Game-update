@@ -47,7 +47,7 @@ def test_normalize_steam_bbcode():
     patch = normalize(raw)
     assert patch.version == "0.6.8"
     titles = [s.title for s in patch.sections]
-    assert titles == ["General", "Balance adjustments", "Bug fixes", "Known issues"]
+    assert titles == ["", "Balance adjustments", "Bug fixes", "Known issues"]
     bugfix = patch.sections[2]
     assert [(i.subgroup, i.kind) for i in bugfix.items] == [
         (None, "fix"), (None, "fix"), ("Multiplayer", "fix")]
