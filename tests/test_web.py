@@ -139,3 +139,21 @@ def test_no_guessed_labels_displayed(client, conn, config):
         assert 'class="kind' not in html and ">FIX<" not in html and ">BAL<" not in html, path
         assert "correctifs" not in html and "équilibrage" not in html, path
     assert "Fixed a crash when opening the Paldeck on Xbox" in client.get("/patch/1").get_data(as_text=True)
+
+
+def test_static_files_are_versioned(app, client, tmp_path):
+    # Sans empreinte, le service worker servirait indéfiniment l'ancien CSS/JS.
+    html = client.get("/").get_data(as_text=True)
+    css = re.search(r'href="(/static/app\.css\?v=[0-9a-f]{12})"', html)
+    js = re.search(r'src="(/static/app\.js\?v=[0-9a-f]{12})"', html)
+    assert css and js
+    assert client.get(css.group(1)).status_code == 200
+    from app.web.filters import static_url
+    (tmp_path / "x.css").write_text("a{}", encoding="utf-8")
+    app.static_folder = str(tmp_path)
+    with app.test_request_context():
+        before = static_url("x.css")
+        (tmp_path / "x.css").write_text("b{}", encoding="utf-8")
+        import os
+        os.utime(tmp_path / "x.css", ns=(1, 1))
+        assert static_url("x.css") != before

@@ -1,11 +1,14 @@
-"""Filtres Jinja : dates en français, pluriels."""
+"""Filtres Jinja : dates en français, pluriels, URLs versionnées des fichiers statiques."""
 
 from __future__ import annotations
 
+import hashlib
 from datetime import datetime, timedelta, timezone
+from functools import lru_cache
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from flask import Flask, current_app
+from flask import Flask, current_app, url_for
 
 MONTHS_SHORT = ["janv.", "févr.", "mars", "avr.", "mai", "juin",
                 "juil.", "août", "sept.", "oct.", "nov.", "déc."]
@@ -57,7 +60,25 @@ def plural(n: int, singular: str, plural_form: str | None = None) -> str:
     return f"{n} {singular if n <= 1 else (plural_form or singular + 's')}"
 
 
+@lru_cache(maxsize=64)
+def _file_version(path: str, mtime_ns: int) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:12]
+
+
+def static_url(filename: str) -> str:
+    """URL d'un fichier statique avec son empreinte (?v=...) : le service worker
+    et le navigateur gardent ces fichiers en cache, une nouvelle version doit
+    donc changer d'URL pour être rechargée."""
+    path = Path(current_app.static_folder) / filename
+    try:
+        version = _file_version(str(path), path.stat().st_mtime_ns)
+    except OSError:
+        return url_for("static", filename=filename)
+    return url_for("static", filename=filename, v=version)
+
+
 def register(app: Flask) -> None:
     app.jinja_env.filters.update(fr_date=fr_date, fr_datetime=fr_datetime,
                                  patch_date=patch_date, plural=plural)
     app.jinja_env.tests["announced_ahead"] = announced_ahead
+    app.jinja_env.globals["static_url"] = static_url
