@@ -23,7 +23,9 @@
   {{ game_tag(patch.game_slug, patch.game_short | upper) }}
   <h1>{{ display_title(patch) }}</h1>
   {% if patch.version and patch.build %}<p class="subtitle">{{ patch.title }}</p>{% endif %}
-  <div class="mono muted small">{{ meta_line(patch, long_date=true) }}</div>
+  <span class="hero__date">{{ (patch.published_at or patch.created_at) | fr_date(true) }}</span>
+  {% set meta = meta_line(patch) %}
+  {% if meta %}<div class="mono muted small">{{ meta }}</div>{% endif %}
   {% if patch is announced_ahead %}
   <p class="notice">Date annoncée par la source ; patch détecté le {{ patch.created_at | fr_date(true) }}.</p>
   {% endif %}
