@@ -26,9 +26,23 @@
 {{ parts | join(' · ') }}
 {%- endmacro %}
 
-{% macro app_header() -%}
+{% macro app_header(games=none, game=none) -%}
 <header class="topbar">
-  <a class="brand" href="{{ url_for('feed.index') }}">{{ icon('logo') }}<span>GAME UPDATE</span></a>
+  <div class="topbar__left">
+    <a class="brand{% if games %} brand--with-picker{% endif %}" href="{{ url_for('feed.index') }}">{{ icon('logo') }}<span>GAME UPDATE</span></a>
+    {% if games %}
+    <form class="picker" action="{{ url_for('feed.index') }}" method="get">
+      <label class="visually-hidden" for="game">Jeu</label>
+      <select id="game" name="game" data-autosubmit>
+        <option value=""{% if not game %} selected{% endif %} disabled>Choisis un jeu</option>
+        {% for g in games %}
+        <option value="{{ g.slug }}"{% if game and g.slug == game.slug %} selected{% endif %}>{{ g.name }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn" type="submit" data-autosubmit-fallback>Voir</button>
+    </form>
+    {% endif %}
+  </div>
   <a class="icon-btn" href="{{ url_for('games.settings') }}" aria-label="Réglages">{{ icon('settings') }}</a>
 </header>
 {%- endmacro %}

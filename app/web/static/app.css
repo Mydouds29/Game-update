@@ -43,6 +43,7 @@ main { flex: 1; }
 .topbar--compact { padding: 0 12px; }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: .5px; min-height: 44px; }
 .brand svg { color: var(--accent); }
+@media (max-width: 519px) { .brand--with-picker span { display: none; } }
 .back { min-height: 44px; padding: 0 8px; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 15px; color: var(--text); text-decoration: none; }
 .actions { display: flex; gap: 8px; }
 .icon-btn { width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
@@ -114,12 +115,13 @@ a.card:hover { color: var(--text); }
 /* Accueil : menu déroulant des jeux */
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 [hidden] { display: none !important; }
-.picker { padding: 20px var(--gutter) 0; display: flex; gap: 8px; align-items: center; }
-.picker__form { flex: 1; min-width: 0; display: flex; gap: 8px; }
-.picker select { flex: 1; min-width: 0; min-height: 56px; padding: 0 48px 0 18px; border-radius: 12px; border: 1px solid var(--border); color: var(--text); font: 600 18px var(--font-body); cursor: pointer; appearance: none;
-  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23A7ADB5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center; }
-.picker select:focus { outline: none; border-color: var(--accent); }
-.picker .btn { min-height: 52px; }
+.topbar__left { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.picker { display: flex; min-width: 0; }
+.picker select { min-width: 0; max-width: 100%; min-height: 40px; padding: 0 30px 0 12px; border: 1px solid transparent; border-radius: 8px; color: var(--text); font: 600 16px var(--font-body); cursor: pointer; appearance: none; text-overflow: ellipsis;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23F0A742' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center; }
+.picker select:hover, .picker select:focus { outline: none; border-color: var(--border); background-color: var(--surface); }
+.picker select option { background: var(--surface); color: var(--text); }
+.game-bar { padding: 16px var(--gutter) 0; display: flex; justify-content: flex-end; }
 .block-empty { margin: 20px var(--gutter) 0; }
 .patches { display: flex; flex-direction: column; gap: 6px; }
 .patch-full { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
@@ -139,7 +141,6 @@ a.card:hover { color: var(--text); }
 @media (min-width: 960px) {
   :root { --gutter: 32px; }
   .shell { max-width: 880px; }
-  .picker { padding-top: 32px; }
 
   .patch-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: 40px; padding: 0 var(--gutter); }
   .patch-layout--single { grid-template-columns: minmax(0, 1fr); }
