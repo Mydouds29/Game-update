@@ -14,7 +14,7 @@ CREATE TABLE sources (
     id                   INTEGER PRIMARY KEY,
     game_id              INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
     key                  TEXT    NOT NULL UNIQUE,          -- identifiant stable issu du catalogue
-    type                 TEXT    NOT NULL CHECK (type IN ('steam', 'blizzard', 'html')),
+    type                 TEXT    NOT NULL CHECK (type IN ('rss', 'steam', 'blizzard', 'html')),
     label                TEXT    NOT NULL,
     params               TEXT    NOT NULL DEFAULT '{}',    -- JSON
     enabled              INTEGER NOT NULL DEFAULT 1 CHECK (enabled IN (0, 1)),

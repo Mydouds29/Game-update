@@ -9,7 +9,7 @@ Stack : Python 3.11+ · Flask · SQLite · Jinja · gunicorn + systemd.
 ## Fonctionnement
 
 ```
-collectors/ (steam, blizzard, html_generic)   ->  RawPatch
+collectors/ (rss, steam, blizzard, html_generic)  ->  RawPatch
 parsing/classifier.py  patch note ou promo/événement ?
 parsing/normalizer.py  BBCode/HTML -> sections -> éléments (fix/new/balance/change/note)
 services/ingest.py     déduplication (id source + hash de contenu), mises à jour, fetch_log
@@ -45,7 +45,7 @@ cp .env.example .env    # puis GU_ENV=development, GU_NOTIFIER=log, GU_DATABASE_
 .venv/bin/pytest
 ```
 
-Autres commandes : `verify-sources`, `record-fixture <source>`, `notify`,
+Autres commandes : `discover-feeds <url>`, `verify-sources`, `record-fixture <source>`, `notify`,
 `test-notify`, `backup-db`.
 
 ## Déploiement
@@ -59,6 +59,14 @@ Aucun jeu n'est configuré : `app/catalog.toml` est vide en attendant que les
 jeux et leurs sources soient choisis. Le format d'une entrée est décrit en tête
 du fichier ; `tests/fixtures/catalog_test.toml` contient des exemples utilisés
 uniquement par les tests.
+
+Choix de la source d'un jeu, dans cet ordre :
+
+1. **Flux RSS/Atom officiel de l'éditeur** : prévu pour être repris, le plus stable.
+   Le chercher avec `flask --app wsgi discover-feeds <url du site officiel>`.
+2. **Annonces Steam de l'éditeur** : contenu officiel et API autorisée, mais dépendance à Valve.
+3. **Page du site officiel** (scraping) : seulement à défaut, après lecture de ses
+   conditions d'utilisation.
 
 Avant d'activer une source : `flask --app wsgi verify-sources`, puis
 `record-fixture` pour enregistrer une réponse réelle et la tester.

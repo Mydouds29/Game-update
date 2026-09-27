@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Example Game Updates</title>
+  <id>urn:example:updates</id>
+  <updated>2026-09-25T12:00:00Z</updated>
+  <entry>
+    <title>Update 2.0.1</title>
+    <id>urn:example:update:201</id>
+    <link rel="alternate" href="https://game.example/updates/2.0.1"/>
+    <published>2026-09-25T12:00:00Z</published>
+    <updated>2026-09-26T08:00:00Z</updated>
+    <content type="html">&lt;h2&gt;Changes&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;Added a photo mode.&lt;/li&gt;&lt;/ul&gt;</content>
+  </entry>
+</feed>

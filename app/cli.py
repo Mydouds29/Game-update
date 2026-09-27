@@ -117,6 +117,13 @@ def register_cli(app: Flask) -> None:
                     name = fetch_app_name(http, s.params["appid"])
                     ok = bool(name)
                     detail = f"AppID {s.params['appid']} = {name!r} (attendu : {s.game_name})"
+                elif s.type == "rss":
+                    from .collectors.rss import ACCEPT, parse_feed
+                    resp = http.get(s.params["url"], accept=ACCEPT)
+                    items = parse_feed(resp.content or resp.text, s.params["url"])
+                    ok = bool(items)
+                    detail = (f"{s.params['url']} -> {len(items)} entrées"
+                              + (f", dernière : {items[0].title!r}" if items else ""))
                 else:
                     url = s.params.get("url") or s.params.get("list_url")
                     allowed = http.allowed_by_robots(url)
@@ -132,6 +139,20 @@ def register_cli(app: Flask) -> None:
             click.echo(f"{state} {s.key}{enabled}: {detail}")
         if problems:
             raise click.ClickException(f"{problems} source(s) à corriger")
+
+    @app.cli.command("discover-feeds")
+    @click.argument("site_url")
+    def discover_feeds_cmd(site_url: str) -> None:
+        """Cherche les flux RSS/Atom proposés par un site (à faire avant tout autre choix de source)."""
+        from .collectors.rss import discover_feeds
+        found = discover_feeds(make_http(current_app.config["GU"]), site_url)
+        if not found:
+            click.echo("Aucun flux RSS/Atom valide trouvé.")
+            return
+        for feed in found:
+            click.echo(f"{feed['url']}  ({feed['found_via']}, {feed['items']} entrées)")
+            for title in feed["sample"]:
+                click.echo(f"    - {title}")
 
     @app.cli.command("record-fixture")
     @click.argument("source_key")
@@ -155,7 +176,8 @@ def register_cli(app: Flask) -> None:
             ext = "json"
         else:
             resp = http.get(s.params.get("url") or s.params["list_url"])
-            ext = "json" if s.params.get("mode") == "json_list" else "html"
+            ext = {"rss": "xml"}.get(s.type) or (
+                "json" if s.params.get("mode") == "json_list" else "html")
         out.mkdir(parents=True, exist_ok=True)
         target = out / f"{source_key}.recorded.{ext}"
         target.write_text(resp.text, encoding="utf-8")

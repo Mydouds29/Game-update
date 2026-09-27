@@ -3,6 +3,14 @@
 # Aucun jeu n'est encore choisi : Frédéric décide de chaque jeu et de sa source
 # avant tout ajout ici.
 #
+# Choix de la source, dans cet ordre :
+#   1. flux RSS/Atom officiel de l'éditeur (type "rss") : prévu pour être repris,
+#      le plus stable. Le chercher avec `flask --app wsgi discover-feeds <url du site>`.
+#   2. annonces Steam de l'éditeur (type "steam") : contenu officiel, API autorisée,
+#      mais dépendance à Valve.
+#   3. page du site officiel (types "blizzard" / "html") : seulement à défaut,
+#      après lecture des conditions d'utilisation du site.
+#
 # Format d'une entrée (voir tests/fixtures/catalog_test.toml pour des exemples) :
 #
 # [[games]]
@@ -13,11 +21,12 @@
 #
 #   [[games.sources]]
 #   key = "mon-jeu-steam"       # identifiant stable de la source
-#   type = "steam"              # steam | blizzard | html
-#   label = "Steam"
+#   type = "rss"                # rss | steam | blizzard | html
+#   label = "Flux officiel"
 #   enabled = true
 #   fetch_interval = 1800       # secondes, minimum 300
-#   params = { appid = 123456 } # à vérifier avec `flask --app wsgi verify-sources`
+#   params = { url = "https://editeur.example/news/rss" }
+#   # steam : params = { appid = 123456 }, à vérifier avec `verify-sources`
 #
 # - L'état actif/inactif d'un jeu n'est fixé qu'à sa création : ensuite c'est
 #   l'écran « Jeux » qui décide.

@@ -39,6 +39,7 @@ class HttpResponse:
     status: int
     text: str
     headers: dict[str, str] = field(default_factory=dict)
+    content: bytes = b""
 
     @property
     def not_modified(self) -> bool:
@@ -158,11 +159,13 @@ class HttpClient:
                 encoding = resp.encoding or "utf-8"
                 if "charset" not in resp.headers.get("content-type", "").lower():
                     encoding = "utf-8"
-                text = b"".join(chunks).decode(encoding, errors="replace")
+                content = b"".join(chunks)
+                text = content.decode(encoding, errors="replace")
                 return HttpResponse(
                     url=resp.url,
                     status=resp.status_code,
                     text=text,
+                    content=content,
                     headers={k.lower(): v for k, v in resp.headers.items()},
                 )
         except requests.RequestException as exc:
