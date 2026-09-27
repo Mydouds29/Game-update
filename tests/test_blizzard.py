@@ -144,9 +144,10 @@ def test_news_api_keeps_only_patch_notes_of_the_game():
     result = BlizzardCollector().fetch(_news_source(), http)
     assert [p.url for p in result.patches] == [ARTICLE]
     fetched = [c["url"] for c in http.calls]
-    # Ni l'annonce « Highlights », ni l'événement, ni l'article d'un autre jeu,
+    # Ni le PTR, ni l'annonce « Highlights », ni l'événement, ni l'article d'un autre jeu,
     # ni une adresse hors de news.blizzard.com.
-    assert not any(u.endswith(("/highlights", "/event", "/other", "/fake")) for u in fetched)
+    assert not any(u.endswith(("/ptr", "/highlights", "/event", "/other", "/fake"))
+                   for u in fetched)
     assert NEWS_MORE not in fetched  # une seule page par défaut
 
 

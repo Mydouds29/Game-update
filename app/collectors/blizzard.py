@@ -25,7 +25,9 @@ from urllib.parse import urljoin, urlsplit
 
 from bs4 import BeautifulSoup, Tag
 
-from ..parsing.classifier import PATCH_TITLE, PREVIEW_TITLE, looks_like_patch_title
+from ..parsing.classifier import (
+    PATCH_TITLE, PREVIEW_TITLE, PTR_TITLE, looks_like_patch_title,
+)
 from .base import (
     Collector, CollectorConfigError, FetchResult, ParseError, RawPatch,
     SourceConfig, require_param,
@@ -415,7 +417,9 @@ class BlizzardCollector(Collector):
             if product_id and props.get("cxpProductId") != product_id:
                 continue
             title, url = props.get("title") or "", props.get("newsUrl") or ""
-            if not PATCH_TITLE.search(title) or PREVIEW_TITLE.search(title):
+            # Le PTR serait refusé à l'ingestion : inutile de le télécharger.
+            if (not PATCH_TITLE.search(title) or PREVIEW_TITLE.search(title)
+                    or PTR_TITLE.search(title)):
                 continue
             if urlsplit(url).netloc != "news.blizzard.com" or f"url:{url}" in source.known_keys:
                 continue
