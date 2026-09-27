@@ -28,6 +28,10 @@ _NEGATIVE = re.compile(
 
 PATCH_TAGS = frozenset({"patchnotes", "patch_notes", "patchnote"})
 
+# Notes du PTR (serveur de test public) : jamais retenues, même d'une source de
+# confiance. Elles décrivent des changements en test, pas le jeu en ligne.
+PTR_TITLE = re.compile(r"\b(PTR|public\s+test\s+realm)\b", re.I)
+
 
 @dataclass(frozen=True)
 class Classification:
@@ -69,3 +73,8 @@ def classify(title: str, tags: list[str] | None = None, body: str = "") -> Class
 def looks_like_patch_title(title: str) -> bool:
     """Pré-filtre sur le seul titre, avant de télécharger un article."""
     return classify(title).is_patch
+
+
+def is_ptr(title: str) -> bool:
+    """Note du serveur de test public (PTR), à écarter."""
+    return bool(PTR_TITLE.search(title or ""))

@@ -62,3 +62,14 @@ def test_known_topics_are_not_refetched():
 def test_invalid_params(params):
     with pytest.raises(CollectorConfigError):
         DiscourseCollector().validate_params(params)
+
+
+def test_ptr_topics_are_skipped():
+    latest = ('{"topic_list": {"topics": ['
+              '{"id": 950, "title": "PTR Patch Notes - 9.2.0", "created_at": "2026-10-05T10:00:00Z"},'
+              '{"id": 951, "title": "Public Test Realm Hotfix 1", "created_at": "2026-10-06T10:00:00Z"}]}}')
+    http = FakeHttp({LATEST: latest})
+    result = DiscourseCollector().fetch(
+        SourceConfig(id=1, key="d4-forum", type="discourse", params=PARAMS), http)
+    assert result.patches == []
+    assert [c["url"] for c in http.calls] == [LATEST]  # aucun sujet PTR téléchargé

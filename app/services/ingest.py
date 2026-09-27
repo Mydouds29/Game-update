@@ -18,7 +18,7 @@ from ..collectors.http import FetchError, HttpClient, RobotsDisallowed
 from ..collectors.registry import get_collector
 from ..config import Config
 from ..db import repository as repo
-from ..parsing.classifier import classify
+from ..parsing.classifier import classify, is_ptr
 from ..parsing.normalizer import normalize
 
 log = logging.getLogger(__name__)
@@ -112,6 +112,9 @@ def run_source(conn: sqlite3.Connection, source: repo.SourceRow, http: HttpClien
     updated_ids: list[int] = []
     with repo.transaction(conn):
         for raw in result.patches:
+            if is_ptr(raw.title):
+                log.debug("ingest.skipped", extra={**ctx, "title": raw.title, "reason": "PTR"})
+                continue
             if not raw.trusted_patch:
                 verdict = classify(raw.title, raw.tags, raw.body)
                 if not verdict.is_patch:

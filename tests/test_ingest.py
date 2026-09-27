@@ -134,3 +134,15 @@ def test_notifications_retry_until_sent(conn, config):
     assert notifier.sent[0].title == "Palworld — nouveau patch"
     assert notifier.sent[0].click_url.startswith("https://gu.test/patch/")
     assert dispatch_pending(conn, notifier, "https://gu.test") == 0
+
+
+def test_ptr_notes_are_never_stored(conn, config):
+    # Même d'une source de confiance (page Blizzard dédiée), une note PTR est écartée.
+    source = repo.get_source(conn, "diablo-4-blizzard")
+    html = fixture_text("blizzard_d4_accordion.html").replace(
+        "9.1.1 Build #90002 (All Platforms)", "9.1.1 PTR Build #90002 (All Platforms)")
+    http = FakeHttp({source.params["url"]: html})
+    outcome = ingest.run_source(conn, source, http, config, notify_channel=None)
+    titles = [r["title"] for r in conn.execute("SELECT title FROM patches")]
+    assert outcome.status == "ok" and len(titles) == 1
+    assert "PTR" not in titles[0] and titles[0].startswith("9.1.0")
