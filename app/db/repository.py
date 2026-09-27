@@ -338,9 +338,6 @@ def get_patch(conn: sqlite3.Connection, patch_id: int) -> dict[str, Any] | None:
         s["count"] = sum(1 for i in s["items"] if i["kind"] != "note")
     patch["sections"] = sections
     patch["item_count"] = sum(s["count"] for s in sections)
-    patch["fix_count"] = sum(1 for s in sections for i in s["items"] if i["kind"] == "fix")
-    patch["balance_count"] = sum(
-        1 for s in sections for i in s["items"] if i["kind"] == "balance")
     return patch
 
 

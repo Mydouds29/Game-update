@@ -46,7 +46,6 @@
       <li class="item item--note">{{ it.text }}</li>
       {% else %}
       <li class="item">
-        <span class="kind kind--{{ it.kind }}">{{ {'fix': 'FIX', 'new': 'NEW', 'balance': 'BAL', 'change': 'CHG'}[it.kind] }}</span>
         <div>
           {% if it.subgroup %}<span class="subgroup">{{ it.subgroup }}</span>{% endif %}
           <span class="item__text">{{ it.text }}</span>

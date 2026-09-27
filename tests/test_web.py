@@ -129,3 +129,13 @@ def test_basic_auth(config, conn):
     good = base64.b64encode(b"fred:s3cret").decode()
     assert client.get("/", headers={"Authorization": f"Basic {bad}"}).status_code == 401
     assert client.get("/", headers={"Authorization": f"Basic {good}"}).status_code == 200
+
+
+def test_no_guessed_labels_displayed(client, conn, config):
+    # Collecte automatique sans relecture : rien d'inventé à côté du texte de la source.
+    _seed(conn, config)
+    for path in ["/?game=palworld", "/patch/1"]:
+        html = client.get(path).get_data(as_text=True)
+        assert 'class="kind' not in html and ">FIX<" not in html and ">BAL<" not in html, path
+        assert "correctifs" not in html and "équilibrage" not in html, path
+    assert "Fixed a crash when opening the Paldeck on Xbox" in client.get("/patch/1").get_data(as_text=True)

@@ -99,11 +99,6 @@ a.card:hover { color: var(--text); }
 .item__text { font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; }
 .item--note { background: transparent; padding: 4px 0; color: var(--muted); font-size: 14px; display: block; }
 .subgroup { font-size: 12px; font-weight: 600; color: var(--accent); }
-.kind { flex-shrink: 0; margin-top: 2px; font-family: var(--font-mono); font-size: 10px; padding: 2px 6px; border-radius: 4px; min-width: 34px; text-align: center; }
-.kind--fix { background: #1E3342; color: #8CC8F2; }
-.kind--new { background: #1F3520; color: #8BD17C; }
-.kind--balance { background: #3A2A12; color: #F0A742; }
-.kind--change { background: var(--pill); color: var(--muted); }
 .source { margin-top: 24px; padding: 20px var(--gutter); display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
 .source a { font-weight: 600; min-height: 44px; display: inline-flex; align-items: center; }
 
