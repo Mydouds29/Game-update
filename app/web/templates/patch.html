@@ -18,6 +18,7 @@
 </header>
 {% endblock %}
 {% block content %}
+<div class="patch-layout{% if patch.sections | length < 2 %} patch-layout--single{% endif %}">
 <section class="hero">
   {{ game_tag(patch.game_slug, patch.game_short | upper) }}
   <h1>{{ display_title(patch) }}</h1>
@@ -75,4 +76,5 @@
   <span>Source : {{ patch.source_label }} · récupéré automatiquement le {{ patch.created_at | fr_datetime }}</span>
   <a href="{{ patch.source_url }}" rel="noopener noreferrer nofollow" target="_blank">Voir la note officielle →</a>
 </footer>
+</div>
 {% endblock %}

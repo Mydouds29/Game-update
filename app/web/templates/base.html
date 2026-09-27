@@ -25,6 +25,7 @@
 {% if nav %}
 <nav class="tabbar" aria-label="Navigation principale">
   {% from "_macros.html" import icon %}
+  <a class="tabbar__brand brand" href="{{ url_for('feed.index') }}">{{ icon('logo') }}<span>GAME UPDATE</span></a>
   <a href="{{ url_for('feed.index') }}" {% if nav == 'feed' %}aria-current="page"{% endif %}>{{ icon('feed') }}Fil</a>
   <a href="{{ url_for('games.index') }}" {% if nav == 'games' %}aria-current="page"{% endif %}>{{ icon('games') }}Jeux</a>
   <a href="{{ url_for('games.settings') }}" {% if nav == 'settings' %}aria-current="page"{% endif %}>{{ icon('settings') }}Réglages</a>

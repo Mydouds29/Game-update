@@ -33,7 +33,7 @@
 {%- endmacro %}
 
 {% macro app_header() -%}
-<header class="topbar">
+<header class="topbar topbar--app">
   <a class="brand" href="{{ url_for('feed.index') }}">{{ icon('logo') }}<span>GAME UPDATE</span></a>
   <a class="icon-btn" href="{{ url_for('games.settings') }}" aria-label="Notifications et réglages">{{ icon('bell') }}</a>
 </header>
