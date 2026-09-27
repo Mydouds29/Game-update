@@ -8,6 +8,7 @@
 #   2. annonces Steam de l'éditeur (type "steam") : contenu officiel, API autorisée,
 #      mais dépendance à Valve.
 #   3. page du site officiel (types "blizzard" / "html") : seulement à défaut,
+#      (pour Blizzard, mode "news_api" : l'API des pages de news, avec l'historique)
 #      après lecture des conditions d'utilisation du site.
 #   Les hotfixes publiés uniquement sur un forum officiel Discourse passent par
 #   le type "discourse" (sujets du staff seulement).
@@ -73,19 +74,29 @@ tag_color = "#E0B35C"
   fetch_interval = 3600
   params = { forum_url = "https://us.forums.blizzard.com/en/d2r", category = "general-discussion/6", pages = 5 }
 
+  # Quelques patchs sont aussi publiés en article (3.1.1, 3.1.2, 2.4…) : API de
+  # news, historique rattrapé une fois avec `backfill`. Une note présente aux
+  # deux endroits n'est archivée qu'une fois. Vérifié le 2026-09-27.
+  [[games.sources]]
+  key = "diablo-2-resurrected-news"
+  type = "blizzard"
+  label = "Blizzard News"
+  fetch_interval = 3600
+  params = { mode = "news_api", product = "diablo-2-resurrected" }
+
 [[games]]
 slug = "heroes-of-the-storm"
 name = "Heroes of the Storm"
 short_name = "HotS"
 tag_color = "#7FA7F2"
 
-  # « Live Patch Notes », « Balance Patch Notes », hotfixes : sujets du staff
-  # dans General Discussion (les « PTR Patch Notes » sont écartés).
-  # 5 pages ≈ 2 semaines d'activité du forum. Vérifié le 2026-09-27.
+  # Patchs, équilibrages et hotfixes : articles de news.blizzard.com, lus par
+  # l'API qui alimente la page de news du jeu (tout l'historique depuis 2017,
+  # rattrapé une fois avec `backfill`). Les « PTR Patch Notes » sont écartés.
+  # Remplace le forum : mêmes notes, sans risque de doublon. Vérifié le 2026-09-27.
   [[games.sources]]
-  key = "heroes-of-the-storm-forum"
-  type = "discourse"
-  label = "Forum Blizzard"
+  key = "heroes-of-the-storm-news"
+  type = "blizzard"
+  label = "Blizzard News"
   fetch_interval = 3600
-  params = { forum_url = "https://us.forums.blizzard.com/en/heroes", category = "general-discussion/6", pages = 5 }
-
+  params = { mode = "news_api", product = "heroes-of-the-storm" }
