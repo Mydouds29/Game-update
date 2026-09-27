@@ -53,22 +53,34 @@ def migrate(conn: sqlite3.Connection) -> list[str]:
     )
     applied = {row[0] for row in conn.execute("SELECT version FROM schema_migrations")}
     done = []
-    for number, name, sql in _available_migrations():
-        if number in applied:
-            continue
-        log.info("migration.apply", extra={"migration": name})
-        # executescript fait un COMMIT implicite : on encapsule nous-mêmes.
-        try:
-            conn.executescript(
-                "BEGIN;\n"
-                + sql
-                + f"\nINSERT INTO schema_migrations (version, name, applied_at)"
-                f" VALUES ({number}, '{name}', '{utcnow_iso()}');\nCOMMIT;"
-            )
-        except sqlite3.Error:
-            if conn.in_transaction:
-                conn.execute("ROLLBACK")
-            log.exception("migration.failed", extra={"migration": name})
-            raise
-        done.append(name)
+    # Clés étrangères coupées pendant les migrations (procédure SQLite pour
+    # reconstruire une table) : sinon supprimer l'ancienne table `sources`
+    # effacerait en cascade tous les patchs. Cohérence vérifiée avant COMMIT.
+    conn.execute("PRAGMA foreign_keys = OFF")
+    try:
+        for number, name, sql in _available_migrations():
+            if number in applied:
+                continue
+            log.info("migration.apply", extra={"migration": name})
+            # executescript fait un COMMIT implicite : on encapsule nous-mêmes.
+            try:
+                conn.executescript(
+                    "BEGIN;\n"
+                    + sql
+                    + f"\nINSERT INTO schema_migrations (version, name, applied_at)"
+                    f" VALUES ({number}, '{name}', '{utcnow_iso()}');"
+                )
+                broken = conn.execute("PRAGMA foreign_key_check").fetchall()
+                if broken:
+                    raise sqlite3.IntegrityError(
+                        f"{name} : {len(broken)} référence(s) cassée(s)")
+                conn.execute("COMMIT")
+            except sqlite3.Error:
+                if conn.in_transaction:
+                    conn.execute("ROLLBACK")
+                log.exception("migration.failed", extra={"migration": name})
+                raise
+            done.append(name)
+    finally:
+        conn.execute("PRAGMA foreign_keys = ON")
     return done

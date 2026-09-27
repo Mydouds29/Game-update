@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from .base import Collector
 from .blizzard import BlizzardCollector
+from .discourse import DiscourseCollector
 from .html_generic import HtmlGenericCollector
 from .rss import RssCollector
 from .steam import SteamCollector
 
 _COLLECTORS: dict[str, Collector] = {
     c.type: c for c in (
-        RssCollector(), SteamCollector(), BlizzardCollector(), HtmlGenericCollector())
+        RssCollector(), SteamCollector(), BlizzardCollector(), HtmlGenericCollector(),
+        DiscourseCollector())
 }
 
 

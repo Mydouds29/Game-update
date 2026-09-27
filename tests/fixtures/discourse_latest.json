@@ -1,0 +1,7 @@
+{"topic_list": {"topics": [
+  {"id": 13, "title": "About the PC General Discussion category", "slug": "about", "created_at": "2023-03-01T10:00:00.000Z", "pinned": true},
+  {"id": 900, "title": "HOTFIX 2 - October 3, 2026 - 9.1.1", "slug": "hotfix-2-october-3-2026-911", "created_at": "2026-10-03T19:00:00.000Z", "pinned": true},
+  {"id": 901, "title": "Is the last hotfix broken?", "slug": "is-the-last-hotfix-broken", "created_at": "2026-10-03T21:00:00.000Z"},
+  {"id": 899, "title": "HOTFIX 1 - October 1, 2026 - 9.1.1", "slug": "hotfix-1-october-1-2026-911", "created_at": "2026-10-01T18:00:00.000Z", "pinned": true},
+  {"id": 902, "title": "Loot feels bad this season", "slug": "loot-feels-bad", "created_at": "2026-10-02T08:00:00.000Z"}
+]}}
