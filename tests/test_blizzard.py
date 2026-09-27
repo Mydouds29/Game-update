@@ -207,3 +207,26 @@ def test_news_api_skips_known_articles():
 def test_news_api_invalid_params(params):
     with pytest.raises(CollectorConfigError):
         BlizzardCollector().validate_params(params)
+
+
+def test_empty_nested_list_does_not_swallow_lines():
+    # Vu sur les notes Heroes du 14 mars 2017 : une sous-liste vide après la
+    # dernière ligne faisait disparaître cette ligne et son titre (« Silver City »).
+    from app.parsing.normalizer import extract_sections
+    html = ("<h2>Brawl</h2><ul>"
+            "<li><strong>Mage Wars</strong><ul><li>Quest reduced to 2 games</li></ul></li>"
+            "<li><strong>Silver City</strong><ul>"
+            "<li>Now uses Shuffle Pick for hero selection instead of All Random<ul></ul></li>"
+            "</ul></li></ul>")
+    items = [(i.subgroup, i.text) for s in extract_sections(html) for i in s.items]
+    assert items == [
+        ("Mage Wars", "Quest reduced to 2 games"),
+        ("Silver City", "Now uses Shuffle Pick for hero selection instead of All Random"),
+    ]
+
+
+def test_label_announcing_nothing_is_kept_as_a_line():
+    from app.parsing.normalizer import extract_sections
+    html = "<ul><li>Short label<ul><li></li></ul></li><li>Other line.</li></ul>"
+    texts = [i.text for s in extract_sections(html) for i in s.items]
+    assert texts == ["Short label", "Other line."]

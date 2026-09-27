@@ -189,8 +189,11 @@ def _is_label(text: str) -> bool:
 def _walk_list(lst: Tag, builder: _Builder, subgroup: str | None) -> None:
     for li in lst.find_all("li", recursive=False):
         text = _own_text(li)
-        nested = [c for c in li.children if isinstance(c, Tag) and c.name in {"ul", "ol"}]
+        # Une sous-liste vide (oubli de mise en forme de la source) n'en est pas une.
+        nested = [c for c in li.children if isinstance(c, Tag) and c.name in {"ul", "ol"}
+                  and c.find("li")]
         if nested:
+            before = builder.count
             if _is_label(text):
                 child_group = f"{subgroup} › {text}" if subgroup else text
             else:
@@ -198,6 +201,10 @@ def _walk_list(lst: Tag, builder: _Builder, subgroup: str | None) -> None:
                 child_group = subgroup
             for sub in nested:
                 _walk_list(sub, builder, child_group)
+            if builder.count == before:
+                # Le « libellé » n'annonçait rien : son texte reste une ligne,
+                # rien de la source ne doit disparaître.
+                builder.add(text, subgroup=subgroup)
         else:
             builder.add(text, subgroup=subgroup)
 
