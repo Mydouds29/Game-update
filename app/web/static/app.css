@@ -95,12 +95,12 @@ a.card:hover { color: var(--text); }
 .psection { padding: 14px 0 4px; scroll-margin-top: 140px; }
 .psection h2, .psection h3 { font-size: 18px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .psection :is(h2, h3) .mono { font-size: 13px; font-weight: 500; }
-.items { display: flex; flex-direction: column; gap: 2px; }
-.item { position: relative; display: flex; padding: 3px 0 3px 18px; }
-.item::before { content: ""; position: absolute; left: 4px; top: 12px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.items { display: flex; flex-direction: column; gap: 0; }
+.item { position: relative; display: flex; padding: 1px 0 1px 18px; }
+.item::before { content: ""; position: absolute; left: 4px; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
 .item > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.item__text { font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; }
-.item--note { padding: 3px 0; color: var(--muted); font-size: 14px; display: block; }
+.item__text { font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+.item--note { padding: 1px 0; color: var(--muted); font-size: 14px; display: block; }
 .item--note::before { display: none; }
 .subgroup { font-size: 12px; font-weight: 600; color: var(--accent); }
 .source { margin-top: 24px; padding: 20px var(--gutter); display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
