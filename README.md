@@ -55,10 +55,16 @@ Voir [`deploy/README.md`](deploy/README.md) : durcissement du VPS, Tailscale,
 
 ## Jeux couverts
 
-Aucun jeu n'est configuré : `app/catalog.toml` est vide en attendant que les
-jeux et leurs sources soient choisis. Le format d'une entrée est décrit en tête
-du fichier ; `tests/fixtures/catalog_test.toml` contient des exemples utilisés
-uniquement par les tests.
+Un seul jeu pour l'instant, **Diablo IV** (`app/catalog.toml`) :
+
+- gros patchs : page officielle des patch notes sur news.blizzard.com (type `blizzard`) ;
+- hotfixes : sujets du staff sur le forum officiel us.forums.blizzard.com (type `discourse`).
+
+Les notes du PTR (serveur de test public) sont écartées, quelle que soit la source.
+Le texte des patch notes est affiché tel que publié, sans étiquette ajoutée.
+
+Le format d'une entrée est décrit en tête du catalogue ;
+`tests/fixtures/catalog_test.toml` contient des exemples utilisés uniquement par les tests.
 
 Choix de la source d'un jeu, dans cet ordre :
 

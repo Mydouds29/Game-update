@@ -1,7 +1,6 @@
 # Catalogue curaté des jeux couverts. Appliqué avec `flask --app wsgi sync-catalog`.
 #
-# Aucun jeu n'est encore choisi : Frédéric décide de chaque jeu et de sa source
-# avant tout ajout ici.
+# Frédéric décide de chaque jeu et de sa source avant tout ajout ici.
 #
 # Choix de la source, dans cet ordre :
 #   1. flux RSS/Atom officiel de l'éditeur (type "rss") : prévu pour être repris,
@@ -10,18 +9,20 @@
 #      mais dépendance à Valve.
 #   3. page du site officiel (types "blizzard" / "html") : seulement à défaut,
 #      après lecture des conditions d'utilisation du site.
+#   Les hotfixes publiés uniquement sur un forum officiel Discourse passent par
+#   le type "discourse" (sujets du staff seulement).
 #
 # Format d'une entrée (voir tests/fixtures/catalog_test.toml pour des exemples) :
 #
 # [[games]]
 # slug = "mon-jeu"              # minuscules, chiffres et tirets
 # name = "Nom complet du jeu"
-# short_name = "Nom court"      # affiché dans les filtres du fil
+# short_name = "Nom court"      # affiché sur l'étiquette du jeu
 # tag_color = "#RRGGBB"
 #
 #   [[games.sources]]
 #   key = "mon-jeu-steam"       # identifiant stable de la source
-#   type = "rss"                # rss | steam | blizzard | html
+#   type = "rss"                # rss | steam | blizzard | html | discourse
 #   label = "Flux officiel"
 #   enabled = true
 #   fetch_interval = 1800       # secondes, minimum 300
@@ -29,5 +30,29 @@
 #   # steam : params = { appid = 123456 }, à vérifier avec `verify-sources`
 #
 # - L'état actif/inactif d'un jeu n'est fixé qu'à sa création : ensuite c'est
-#   l'écran « Jeux » qui décide.
+#   le bouton « Suivi » de l'appli qui décide (notifications).
 # - Un jeu ou une source retiré de ce fichier est désactivé, jamais supprimé.
+
+[[games]]
+slug = "diablo-4"
+name = "Diablo IV"
+short_name = "Diablo IV"
+tag_color = "#F29B94"
+
+  # Gros patchs : page officielle, une version par bloc repliable.
+  # Vérifiée le 2026-09-27 (3.2.2 lu en entier, robots.txt respecté).
+  [[games.sources]]
+  key = "diablo-4-blizzard"
+  type = "blizzard"
+  label = "Blizzard News"
+  fetch_interval = 3600
+  params = { mode = "anchored_page", url = "https://news.blizzard.com/en-us/article/24295395/diablo-iv-patch-notes" }
+
+  # Hotfixes : publiés seulement sur le forum officiel, dans des sujets du staff
+  # (« HOTFIX 4 - September 22, 2026 - 3.2.1 »). Vérifié le 2026-09-27.
+  [[games.sources]]
+  key = "diablo-4-forum"
+  type = "discourse"
+  label = "Forum Blizzard"
+  fetch_interval = 3600
+  params = { forum_url = "https://us.forums.blizzard.com/en/d4", category = "pc-general-discussion/5" }
