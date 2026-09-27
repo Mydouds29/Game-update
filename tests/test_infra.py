@@ -98,8 +98,9 @@ def test_size_limit_and_errors():
 
 
 def test_app_catalog_has_no_undecided_games():
-    # Aucun jeu n'est ajouté sans décision explicite du propriétaire.
-    assert load_catalog()["games"] == []
+    # Aucun jeu n'est ajouté sans décision explicite du propriétaire :
+    # cette liste ne change que sur sa demande (Diablo IV : 2026-09-27).
+    assert [g["slug"] for g in load_catalog()["games"]] == ["diablo-4"]
 
 
 def test_test_catalog_is_valid():
