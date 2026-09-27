@@ -58,6 +58,8 @@ def test_known_topics_are_not_refetched():
     {"forum_url": FORUM, "category": "../admin"},
     {**PARAMS, "title_pattern": "("},
     {**PARAMS, "max_topics": 50},
+    {**PARAMS, "pages": 0},
+    {**PARAMS, "pages": 11},
 ])
 def test_invalid_params(params):
     with pytest.raises(CollectorConfigError):
@@ -73,3 +75,26 @@ def test_ptr_topics_are_skipped():
         SourceConfig(id=1, key="d4-forum", type="discourse", params=PARAMS), http)
     assert result.patches == []
     assert [c["url"] for c in http.calls] == [LATEST]  # aucun sujet PTR téléchargé
+
+
+def test_several_pages_are_read_without_duplicates():
+    http = _http()
+    source = SourceConfig(id=1, key="d2r-forum", type="discourse",
+                          params={**PARAMS, "pages": 3})
+    result = DiscourseCollector().fetch(source, http)
+    list_calls = [c for c in http.calls if c["url"] == LATEST]
+    assert [c["params"] for c in list_calls] == [None, {"page": 1}, {"page": 2}]
+    # Les mêmes sujets vus sur plusieurs pages ne sont téléchargés qu'une fois.
+    assert [c["url"] for c in http.calls].count(f"{FORUM}/t/900.json") == 1
+    assert [p.source_key for p in result.patches] == ["topic:900"]
+
+
+def test_patch_title_without_notes_word_is_kept():
+    # D2R titre ses notes « Patch 3.2.0.2 – July 16, 2026 », sans « Notes ».
+    import re
+
+    from app.collectors.discourse import DEFAULT_TITLE_PATTERN
+    title_re = re.compile(DEFAULT_TITLE_PATTERN, re.I)
+    assert title_re.search("Patch 3.2.0.2 – July 16, 2026")
+    assert title_re.search("Heroes of the Storm Balance Patch Notes - May 11, 2026")
+    assert not title_re.search("4/1 Patch breaks Steam version. Not April fools")

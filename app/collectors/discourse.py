@@ -10,11 +10,16 @@ Paramètres :
 
 * ``forum_url`` : racine du forum, ex. ``https://us.forums.blizzard.com/en/d4`` ;
 * ``category`` : chemin de la catégorie, ex. ``pc-general-discussion/5`` ;
-* ``title_pattern`` : expression régulière sur le titre (défaut : hotfix / patch notes) ;
+* ``title_pattern`` : expression régulière sur le titre (défaut : hotfix,
+  patch notes, « Patch » suivi d'un numéro) ;
 * ``exclude_pattern`` : titres écartés même s'ils correspondent (défaut : notes
   du PTR, le serveur de test public, qui ne concernent pas le jeu en ligne) ;
 * ``staff_only`` : n'accepter que les messages de comptes staff (défaut : true) ;
-* ``max_topics`` : nombre maximal de nouveaux sujets lus par collecte (défaut : 5).
+* ``max_topics`` : nombre maximal de nouveaux sujets lus par collecte (défaut : 5) ;
+* ``pages`` : nombre de pages de la liste parcourues (30 sujets par page,
+  défaut : 1). Plus de pages quand les notes ne sont pas épinglées et que la
+  catégorie est active : elles descendent vite, et le serveur n'est pas
+  toujours allumé pour les voir passer.
 """
 
 from __future__ import annotations
@@ -35,7 +40,8 @@ from .http import FetchError, HttpClient
 
 log = logging.getLogger(__name__)
 
-DEFAULT_TITLE_PATTERN = r"\b(hotfix(es)?|patch\s*notes?)\b"
+# « Patch Notes », « HOTFIX 4 », ou « Patch 3.2.0.2 – July 16 » (D2R, sans « Notes »).
+DEFAULT_TITLE_PATTERN = r"\b(hotfix(es)?|patch\s*notes?|patch\s+v?\d)"
 # Sujets PTR écartés dès la liste (évite de les télécharger) ; l'ingestion les
 # refuse de toute façon, quelle que soit la source.
 DEFAULT_EXCLUDE_PATTERN = PTR_TITLE.pattern
@@ -125,6 +131,9 @@ class DiscourseCollector(Collector):
         max_topics = params.get("max_topics", 5)
         if not isinstance(max_topics, int) or not 1 <= max_topics <= 20:
             raise CollectorConfigError("'max_topics' doit être un entier entre 1 et 20")
+        pages = params.get("pages", 1)
+        if not isinstance(pages, int) or not 1 <= pages <= 10:
+            raise CollectorConfigError("'pages' doit être un entier entre 1 et 10")
 
     def fetch(self, source: SourceConfig, http: HttpClient) -> FetchResult:
         self.validate_params(source.params)
@@ -132,15 +141,26 @@ class DiscourseCollector(Collector):
         forum_url = p["forum_url"]
         title_re = re.compile(p.get("title_pattern", DEFAULT_TITLE_PATTERN), re.I)
         exclude_re = re.compile(p.get("exclude_pattern", DEFAULT_EXCLUDE_PATTERN), re.I)
-        resp = http.get(f"{forum_url}/c/{p['category']}/l/latest.json",
-                        etag=source.etag, last_modified=source.last_modified,
+        list_url = f"{forum_url}/c/{p['category']}/l/latest.json"
+        resp = http.get(list_url, etag=source.etag, last_modified=source.last_modified,
                         accept="application/json")
         if resp.not_modified:
             return FetchResult([], not_modified=True, etag=source.etag,
                                last_modified=source.last_modified)
+        topics = parse_topic_list(resp.text, title_re, exclude_re)
+        for page in range(1, p.get("pages", 1)):
+            try:
+                more = http.get(list_url, params={"page": page}, accept="application/json")
+                found = parse_topic_list(more.text, title_re, exclude_re)
+            except (FetchError, ParseError) as exc:
+                log.warning("discourse.page_failed",
+                            extra={"source": source.key, "page": page, "error": str(exc)})
+                break
+            topics += [t for t in found if t["id"] not in {x["id"] for x in topics}]
+        topics.sort(key=lambda t: t.get("created_at") or "", reverse=True)
         patches: list[RawPatch] = []
         read = 0
-        for topic in parse_topic_list(resp.text, title_re, exclude_re):
+        for topic in topics:
             if read >= p.get("max_topics", 5):
                 break
             if f"topic:{topic['id']}" in source.known_keys:
