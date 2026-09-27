@@ -56,3 +56,36 @@ tag_color = "#F29B94"
   label = "Forum Blizzard"
   fetch_interval = 3600
   params = { forum_url = "https://us.forums.blizzard.com/en/d4", category = "pc-general-discussion/5" }
+
+[[games]]
+slug = "diablo-2-resurrected"
+name = "Diablo II: Resurrected"
+short_name = "D2R"
+tag_color = "#E0B35C"
+
+  # Patchs et hotfixes : sujets du staff dans General Discussion, non épinglés
+  # (« Patch 3.2.0.2 – July 16, 2026 », « HOTFIX 1 - April 2, 2026 - 3.1.2 »).
+  # 5 pages ≈ 2 semaines d'activité du forum. Vérifié le 2026-09-27.
+  [[games.sources]]
+  key = "diablo-2-resurrected-forum"
+  type = "discourse"
+  label = "Forum Blizzard"
+  fetch_interval = 3600
+  params = { forum_url = "https://us.forums.blizzard.com/en/d2r", category = "general-discussion/6", pages = 5 }
+
+[[games]]
+slug = "heroes-of-the-storm"
+name = "Heroes of the Storm"
+short_name = "HotS"
+tag_color = "#7FA7F2"
+
+  # « Live Patch Notes », « Balance Patch Notes », hotfixes : sujets du staff
+  # dans General Discussion (les « PTR Patch Notes » sont écartés).
+  # 5 pages ≈ 2 semaines d'activité du forum. Vérifié le 2026-09-27.
+  [[games.sources]]
+  key = "heroes-of-the-storm-forum"
+  type = "discourse"
+  label = "Forum Blizzard"
+  fetch_interval = 3600
+  params = { forum_url = "https://us.forums.blizzard.com/en/heroes", category = "general-discussion/6", pages = 5 }
+
