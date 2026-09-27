@@ -30,17 +30,23 @@
 {% elif game %}
 <section class="block">
   {% if patches %}
+  <div class="patches">
   {% for p in patches %}
-  <article class="patch-full">
-    <header class="patch-full__head">
-      <h2><a href="{{ url_for('patch.detail', patch_id=p.id) }}">{{ display_title(p) }}</a></h2>
-      <div class="mono muted small">{{ meta_line(p, long_date=true) }}</div>
+  <details class="patch-full">
+    <summary class="patch-full__head">
+      <span class="patch-full__title">{{ display_title(p) }}</span>
+      <span class="patch-full__date">{{ p | patch_date }}</span>
+    </summary>
+    <div class="patch-full__body">
+      {% set meta = meta_line(p) %}
+      {% if meta %}<div class="mono muted small">{{ meta }}</div>{% endif %}
       {% if p.version and p.build %}<p class="subtitle">{{ p.title }}</p>{% endif %}
-    </header>
-    {{ patch_sections(p, level=3) }}
-    <a class="patch-full__source" href="{{ p.source_url }}" rel="noopener noreferrer nofollow" target="_blank">Note officielle ({{ p.source_label }}) →</a>
-  </article>
+      {{ patch_sections(p, level=3) }}
+      <a class="patch-full__source" href="{{ p.source_url }}" rel="noopener noreferrer nofollow" target="_blank">Note officielle ({{ p.source_label }}) →</a>
+    </div>
+  </details>
   {% endfor %}
+  </div>
   {% else %}
   <p class="empty">Aucun patch pour l'instant.</p>
   {% endif %}

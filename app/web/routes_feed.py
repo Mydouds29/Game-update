@@ -13,12 +13,12 @@ from ..db import repository as repo
 bp = Blueprint("feed", __name__)
 
 
-PAGE_SIZE = 5  # patchs affichés en entier : pages courtes
+PAGE_SIZE = 20
 
 
 @bp.get("/")
 def index() -> str:
-    """Menu déroulant des jeux ; le jeu choisi affiche ses patchs complets en dessous."""
+    """Menu déroulant des jeux ; le jeu choisi liste ses patchs, dépliables un par un."""
     conn = get_db()
     games = sorted(repo.list_games(conn), key=lambda g: g["name"].casefold())
     game = None
