@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Iterator
 
 from ..parsing.normalizer import Patch
@@ -220,6 +221,29 @@ def find_same_content(conn: sqlite3.Connection, game_id: int, content_hash: str)
         "SELECT 1 FROM patches WHERE game_id = ? AND content_hash = ? LIMIT 1",
         (game_id, content_hash),
     ).fetchone() is not None
+
+
+def _title_key(title: str) -> str:
+    return " ".join(re.sub(r"[^0-9a-z]+", " ", title.casefold()).split())
+
+
+def find_same_title(conn: sqlite3.Connection, game_id: int, title: str,
+                    published_at: datetime | None, days: int = 3) -> bool:
+    """Même note publiée par une autre source (ex. article de news + sujet du
+    forum) : même jeu, même titre (casse et ponctuation ignorées), dates à
+    quelques jours près. Le contenu peut différer légèrement d'une source à
+    l'autre, d'où ce test en plus du hash de contenu."""
+    if published_at is None:
+        return False
+    low, high = published_at - timedelta(days=days), published_at + timedelta(days=days)
+    key = _title_key(title)
+    return any(
+        _title_key(row["title"]) == key
+        for row in conn.execute(
+            "SELECT title FROM patches WHERE game_id = ? AND published_at BETWEEN ? AND ?",
+            (game_id, _iso(low), _iso(high)),
+        )
+    )
 
 
 def find_patch(conn: sqlite3.Connection, source_id: int, source_key: str) -> sqlite3.Row | None:

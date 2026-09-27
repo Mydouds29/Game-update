@@ -32,6 +32,12 @@ PATCH_TAGS = frozenset({"patchnotes", "patch_notes", "patchnote"})
 # confiance. Elles décrivent des changements en test, pas le jeu en ligne.
 PTR_TITLE = re.compile(r"\b(PTR|public\s+test\s+realm)\b", re.I)
 
+# Titre de note de patch (forums, API de news) : « Patch Notes », « HOTFIX 4 »,
+# ou « Patch 3.2.0.2 – July 16 » (D2R n'écrit pas toujours « Notes »).
+PATCH_TITLE = re.compile(r"\b(hotfix(es)?|patch\s*notes?|patch\s+v?\d)", re.I)
+# Articles qui présentent un patch à venir sans en être la note.
+PREVIEW_TITLE = re.compile(r"\b(highlights?|coming\s+soon|preview)\b", re.I)
+
 
 @dataclass(frozen=True)
 class Classification:

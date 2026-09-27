@@ -46,7 +46,8 @@ cp .env.example .env    # puis GU_ENV=development, GU_NOTIFIER=log, GU_DATABASE_
 ```
 
 Autres commandes : `discover-feeds <url>`, `verify-sources`, `record-fixture <source>`, `notify`,
-`test-notify`, `backup-db`.
+`test-notify`, `backup-db`, `backfill <source>` (rattrape une fois l'historique d'une source,
+sans notification).
 
 ## Déploiement
 

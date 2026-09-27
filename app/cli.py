@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -99,6 +100,34 @@ def register_cli(app: Flask) -> None:
             click.echo(line + (f"  {o.error}" if o.error else ""))
         click.echo(f"Notifications envoyées : {sent}")
 
+    @app.cli.command("backfill")
+    @click.argument("source_key")
+    @click.option("--pages", type=int, default=50, show_default=True,
+                  help="Pages de liste parcourues (API de news : 24 articles par page).")
+    @click.option("--max", "max_items", type=int, default=500, show_default=True,
+                  help="Nombre maximal de notes téléchargées.")
+    def backfill(source_key: str, pages: int, max_items: int) -> None:
+        """Rattrape l'historique d'une source, une fois : archive les anciennes
+        notes sans envoyer de notification."""
+        cfg = current_app.config["GU"]
+        conn = _conn()
+        try:
+            source = repo.get_source(conn, source_key)
+            if source is None:
+                raise click.ClickException(f"source inconnue : {source_key}")
+            limits = {"blizzard": ("pages", "max_articles"), "discourse": ("pages", "max_topics")}
+            if source.type not in limits or (
+                    source.type == "blizzard" and source.params.get("mode") != "news_api"):
+                raise click.ClickException(
+                    "rattrapage possible seulement pour les sources blizzard/news_api et discourse")
+            pages_key, max_key = limits[source.type]
+            source = replace(source, params={**source.params, pages_key: pages, max_key: max_items})
+            outcome = ingest.run_source(conn, source, make_http(cfg), cfg, notify_channel=None)
+        finally:
+            conn.close()
+        click.echo(f"{outcome.source_key}: {outcome.status}, +{len(outcome.new_ids)} "
+                   f"note(s) archivée(s){'  ' + outcome.error if outcome.error else ''}")
+
     @app.cli.command("verify-sources")
     def verify_sources() -> None:
         """Vérifie les AppID Steam et l'accessibilité des pages du catalogue."""
@@ -126,6 +155,12 @@ def register_cli(app: Flask) -> None:
                               + (f", dernière : {items[0].title!r}" if items else ""))
                 else:
                     url = s.params.get("url") or s.params.get("list_url")
+                    if s.type == "discourse":
+                        url = f"{s.params['forum_url']}/c/{s.params['category']}/l/latest.json"
+                    elif s.params.get("mode") == "news_api":
+                        from .collectors.blizzard import NEWS_API
+                        url = NEWS_API.format(locale=s.params.get("locale", "en-us"),
+                                              product=s.params["product"])
                     allowed = http.allowed_by_robots(url)
                     resp = http.get(url, check_robots=False) if allowed else None
                     ok = allowed and resp is not None

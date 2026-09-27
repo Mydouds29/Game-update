@@ -16,7 +16,7 @@ from ..collectors.blizzard import parse_heading
 
 MAX_ITEMS = 3000
 MAX_ITEM_CHARS = 4000
-MAX_SUBGROUP_CHARS = 120
+MAX_SUBGROUP_CHARS = 200
 # Contenu placé avant le premier titre : section sans titre (aucun titre inventé,
 # le patch note est affiché tel que publié).
 DEFAULT_SECTION = ""
@@ -108,12 +108,23 @@ def item_kind(text: str, section_title: str = "") -> str:
     return "change"
 
 
+# Niveau d'un libellé en gras seul sur sa ligne : sous tous les titres h1-h6.
+LABEL_LEVEL = 7
+
+
 class _Builder:
     def __init__(self, section_levels: tuple[int, int]) -> None:
         self.sections: list[Section] = []
-        self.subgroup: str | None = None
+        # Titres ouverts sous la section, du plus haut au plus bas : un patch
+        # peut empiler plusieurs niveaux (Balance Update > héros > Base > sort),
+        # aucun ne doit en écraser un autre de niveau supérieur.
+        self.path: list[tuple[int, str]] = []
         self.section_level, self.subgroup_level = section_levels
         self.count = 0
+
+    @property
+    def subgroup(self) -> str | None:
+        return " › ".join(text for _, text in self.path)[:MAX_SUBGROUP_CHARS] or None
 
     @property
     def current(self) -> Section:
@@ -130,10 +141,23 @@ class _Builder:
             self.sections[-1].title = title
         else:
             self.sections.append(Section(title))
-        self.subgroup = None
+        self.path = []
 
-    def set_subgroup(self, title: str | None) -> None:
-        self.subgroup = _clean(title)[:MAX_SUBGROUP_CHARS] if title else None
+    def open_heading(self, level: int, title: str) -> None:
+        """Titre sous la section : remplace les titres de même niveau ou plus bas."""
+        title = _clean(title)
+        if not title:
+            return
+        while self.path and self.path[-1][0] >= level:
+            self.path.pop()
+        self.path.append((level, title))
+
+    def label(self, title: str) -> None:
+        """Libellé en gras : section s'il n'y en a encore aucune, sinon sous-titre."""
+        if self.sections:
+            self.open_heading(LABEL_LEVEL, title)
+        else:
+            self.start_section(title)
 
     def add(self, text: str, *, subgroup: str | None = None, note: bool = False) -> None:
         text = BULLET_RE.sub("", _clean(text))
@@ -223,7 +247,7 @@ def _walk(node: Tag, builder: _Builder) -> None:
             if level <= builder.section_level:
                 builder.start_section(text)
             else:
-                builder.set_subgroup(text)
+                builder.open_heading(level, text)
         elif name in {"ul", "ol"}:
             flush()
             _walk_list(child, builder, builder.subgroup)
@@ -235,11 +259,7 @@ def _walk(node: Tag, builder: _Builder) -> None:
         elif name == "p":
             flush()
             if _whole_bold(child) and _is_label(_clean(child.get_text(" "))):
-                label = _clean(child.get_text(" "))
-                if builder.sections and builder.sections[-1].items:
-                    builder.set_subgroup(label)
-                else:
-                    builder.start_section(label)
+                builder.label(_clean(child.get_text(" ")))
                 continue
             # Les <br> d'un paragraphe séparent des lignes indépendantes.
             lines = [""]
@@ -259,11 +279,7 @@ def _walk(node: Tag, builder: _Builder) -> None:
             nxt = child.next_sibling
             if nxt is None or (isinstance(nxt, Tag) and nxt.name in {"br", "ul", "ol"}):
                 flush()
-                label = _clean(child.get_text(" "))
-                if builder.sections and builder.sections[-1].items:
-                    builder.set_subgroup(label)
-                else:
-                    builder.start_section(label)
+                builder.label(_clean(child.get_text(" ")))
                 continue
             buffer[-1] += child.get_text(" ")
         elif name in CONTAINER_TAGS or name in {"body", "html"}:

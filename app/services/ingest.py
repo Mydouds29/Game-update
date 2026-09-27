@@ -129,7 +129,9 @@ def run_source(conn: sqlite3.Connection, source: repo.SourceRow, http: HttpClien
                 continue
             existing = repo.find_patch(conn, source.id, patch.source_key)
             if existing is None:
-                if repo.find_same_content(conn, source.game_id, patch.content_hash):
+                if (repo.find_same_content(conn, source.game_id, patch.content_hash)
+                        or repo.find_same_title(conn, source.game_id, patch.title,
+                                                patch.published_at)):
                     log.info("ingest.duplicate_content",
                              extra={**ctx, "source_key": patch.source_key})
                     continue

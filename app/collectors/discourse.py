@@ -30,7 +30,7 @@ import re
 from datetime import datetime
 from typing import Any
 
-from ..parsing.classifier import PTR_TITLE
+from ..parsing.classifier import PATCH_TITLE, PTR_TITLE
 from .base import (
     Collector, CollectorConfigError, FetchResult, ParseError, RawPatch,
     SourceConfig, require_param,
@@ -40,8 +40,7 @@ from .http import FetchError, HttpClient
 
 log = logging.getLogger(__name__)
 
-# « Patch Notes », « HOTFIX 4 », ou « Patch 3.2.0.2 – July 16 » (D2R, sans « Notes »).
-DEFAULT_TITLE_PATTERN = r"\b(hotfix(es)?|patch\s*notes?|patch\s+v?\d)"
+DEFAULT_TITLE_PATTERN = PATCH_TITLE.pattern
 # Sujets PTR écartés dès la liste (évite de les télécharger) ; l'ingestion les
 # refuse de toute façon, quelle que soit la source.
 DEFAULT_EXCLUDE_PATTERN = PTR_TITLE.pattern

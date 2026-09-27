@@ -1,6 +1,6 @@
 import pytest
 
-from app.collectors.base import ParseError, SourceConfig
+from app.collectors.base import CollectorConfigError, ParseError, SourceConfig
 from app.collectors.blizzard import (
     BlizzardCollector, parse_heading, split_anchored_page,
 )
@@ -114,3 +114,95 @@ def test_accordion_page_one_patch_per_panel():
     assert "Fixed an issue where the stash could not be opened." not in texts
     druid = [it for s in patch.sections for it in s.items if it.subgroup == "Druid"]
     assert len(druid) == 1
+
+
+NEWS = "https://news.blizzard.com/en-us/api/news/heroes-of-the-storm"
+NEWS_MORE = "https://news.blizzard.com/en-us/api/feed/heroes-of-the-storm"
+ARTICLE = ("https://news.blizzard.com/en-us/article/900/"
+           "heroes-of-the-storm-live-patch-notes-october-5-2026")
+OLD_ARTICLE = ("https://news.blizzard.com/en-us/article/100/"
+               "heroes-of-the-storm-hotfix-notes-march-9-2018")
+
+
+def _news_http():
+    return FakeHttp({
+        NEWS: fixture_text("blizzard_news_api.json"),
+        NEWS_MORE: fixture_text("blizzard_news_api_page2.json"),
+        ARTICLE: fixture_text("blizzard_news_article.html"),
+        OLD_ARTICLE: fixture_text("blizzard_news_article.html").replace(
+            "2026-10-05T17:35:15Z", "2018-03-09T12:00:00Z"),
+    })
+
+
+def _news_source(**params):
+    return SourceConfig(id=1, key="hots-news", type="blizzard",
+                        params={"mode": "news_api", "product": "heroes-of-the-storm", **params})
+
+
+def test_news_api_keeps_only_patch_notes_of_the_game():
+    http = _news_http()
+    result = BlizzardCollector().fetch(_news_source(), http)
+    assert [p.url for p in result.patches] == [ARTICLE]
+    fetched = [c["url"] for c in http.calls]
+    # Ni l'annonce « Highlights », ni l'événement, ni l'article d'un autre jeu,
+    # ni une adresse hors de news.blizzard.com.
+    assert not any(u.endswith(("/highlights", "/event", "/other", "/fake")) for u in fetched)
+    assert NEWS_MORE not in fetched  # une seule page par défaut
+
+
+def test_news_api_article_is_complete_without_navigation():
+    patch = BlizzardCollector().fetch(_news_source(), _news_http()).patches[0]
+    # Données structurées en JSON invalide : la date est lue quand même.
+    assert patch.published_at.isoformat() == "2026-10-05T17:35:15+00:00"
+    assert patch.trusted_patch
+    normalized = normalize(patch)
+    texts = [it.text for s in normalized.sections for it in s.items]
+    titles = [s.title for s in normalized.sections]
+    for nav in ("Return to Top", "Quick Navigation", "Click here to discuss",
+                "Blizzard Entertainment"):
+        assert not any(nav in t for t in texts + titles), nav
+    assert "Our next patch is live! Read on for more information." in texts
+    assert "The ranked season has started." in texts
+    # Un lien au milieu d'une phrase fait partie du contenu : gardé.
+    assert any(t.startswith("Health increased from 1800 to 1850, as described in the notes")
+               for t in texts)
+
+
+def test_news_api_keeps_every_heading_level():
+    # Balance Update > Support > Alexstrasza > Base > Dragonqueen [D] : le nom du
+    # héros ne doit pas être écrasé par les niveaux inférieurs.
+    normalized = normalize(BlizzardCollector().fetch(_news_source(), _news_http()).patches[0])
+    balance = [s for s in normalized.sections if s.title == "Balance Update"][0]
+    groups = {it.text[:20]: it.subgroup for it in balance.items}
+    assert groups["Cooldown reduced fro"] == "Support › Alexstrasza › Base › Dragonqueen [D]"
+    assert groups["Live and Let Live no"] == "Support › Alexstrasza › Talents › Level 1"
+    assert groups["Health increased fro"] == "Support › Brightwing › Base"
+
+
+def test_news_api_history_pages():
+    http = _news_http()
+    result = BlizzardCollector().fetch(_news_source(pages=3), http)
+    assert [p.url for p in result.patches] == [ARTICLE, OLD_ARTICLE]
+    more = [c for c in http.calls if c["url"] == NEWS_MORE]
+    assert [c["params"] for c in more] == [{"offset": 24, "feedCxpProductIds[]": "prod-hots"}]
+    assert result.patches[1].published_at.year == 2018
+
+
+def test_news_api_skips_known_articles():
+    http = _news_http()
+    source = _news_source()
+    source.known_keys = frozenset({f"url:{ARTICLE}"})
+    assert BlizzardCollector().fetch(source, http).patches == []
+    assert ARTICLE not in [c["url"] for c in http.calls]
+
+
+@pytest.mark.parametrize("params", [
+    {"mode": "news_api"},
+    {"mode": "news_api", "product": "../x"},
+    {"mode": "news_api", "product": "hots", "locale": "fr"},
+    {"mode": "news_api", "product": "hots", "pages": 0},
+    {"mode": "news_api", "product": "hots", "max_articles": 1000},
+])
+def test_news_api_invalid_params(params):
+    with pytest.raises(CollectorConfigError):
+        BlizzardCollector().validate_params(params)

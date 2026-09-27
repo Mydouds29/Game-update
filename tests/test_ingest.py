@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from app.collectors.http import FetchError, HttpResponse, RobotsDisallowed
 from app.collectors.steam import NEWS_URL
@@ -146,3 +146,22 @@ def test_ptr_notes_are_never_stored(conn, config):
     titles = [r["title"] for r in conn.execute("SELECT title FROM patches")]
     assert outcome.status == "ok" and len(titles) == 1
     assert "PTR" not in titles[0] and titles[0].startswith("9.1.0")
+
+
+def test_same_note_from_two_sources_is_stored_once(conn, config):
+    # Même note publiée en article de news et sur le forum : titre identique
+    # (casse et ponctuation mises à part), dates à quelques jours près.
+    http = FakeHttp({NEWS_URL: fixture_text("steam_palworld.json")})
+    ingest.run_source(conn, repo.get_source(conn, "palworld-steam"), http, config,
+                      notify_channel=None)
+    game_id = repo.get_game(conn, "palworld")["id"]
+    other_game = repo.get_game(conn, "diablo-4")["id"]
+    row = conn.execute("SELECT published_at FROM patches WHERE title LIKE 'Palworld v0.6.8%'").fetchone()
+    published = datetime.fromisoformat(row["published_at"])
+    assert repo.find_same_title(conn, game_id, "PALWORLD v0.6.8 – Patch Notes", published)
+    assert repo.find_same_title(conn, game_id, "Palworld v0.6.8 Patch Notes",
+                                published + timedelta(days=2))
+    assert not repo.find_same_title(conn, game_id, "Palworld v0.6.8 Patch Notes",
+                                    published + timedelta(days=10))
+    assert not repo.find_same_title(conn, other_game, "Palworld v0.6.8 Patch Notes", published)
+    assert not repo.find_same_title(conn, game_id, "Palworld v0.6.9 Patch Notes", published)
