@@ -3,7 +3,7 @@
 {% block title %}{{ patch.game_name }} · {{ display_title(patch) }}{% endblock %}
 {% block header %}
 <header class="topbar topbar--compact">
-  <a class="back" href="{{ url_for('feed.index') }}">{{ icon('back') }}Fil</a>
+  <a class="back" href="{{ url_for('feed.index', game=patch.game_slug) }}">{{ icon('back') }}{{ patch.game_short }}</a>
   <div class="actions">
     <form method="post" action="{{ url_for('games.set_active', slug=patch.game_slug) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

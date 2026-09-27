@@ -1,6 +1,6 @@
 // Service worker minimal : met en cache les fichiers statiques et affiche
 // la dernière version vue d'une page quand le réseau est indisponible.
-const CACHE = "gu-v1";
+const CACHE = "gu-v2";
 const STATIC = ["/static/app.css", "/static/app.js", "/static/icons/icon.svg"];
 
 self.addEventListener("install", (event) => {

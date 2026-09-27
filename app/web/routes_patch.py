@@ -15,4 +15,4 @@ def detail(patch_id: int) -> str:
     patch = repo.get_patch(get_db(), patch_id)
     if patch is None:
         abort(404, description="Ce patch n'existe pas.")
-    return render_template("patch.html", patch=patch, nav="feed")
+    return render_template("patch.html", patch=patch)

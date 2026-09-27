@@ -19,21 +19,27 @@ def _csrf(client, path):
     return re.search(r'name="csrf_token" value="([^"]+)"', html).group(1)
 
 
-def test_empty_feed(client):
-    resp = client.get("/")
-    assert resp.status_code == 200
-    assert "Aucun patch pour l" in resp.get_data(as_text=True)
-
-
-def test_feed_lists_patches_and_filters(client, conn, config):
-    _seed(conn, config)
+def test_home_lists_games_in_dropdown(client):
     html = client.get("/").get_data(as_text=True)
+    assert '<select id="game" name="game"' in html
+    assert '<option value="palworld">Palworld</option>' in html
+    assert "Aucun patch" not in html  # rien sous le menu tant qu'aucun jeu n'est choisi
+
+
+def test_game_selected_shows_its_patches(client, conn, config):
+    _seed(conn, config)
+    html = client.get("/?game=palworld").get_data(as_text=True)
+    assert '<option value="palworld" selected>' in html
     assert "Palworld v0.6.8 Patch Notes" in html
     assert "Hotfix v0.6.7.1 is now live" in html
     assert "Autumn Sale" not in html
-    assert client.get("/?game=palworld").status_code == 200
     assert "Aucun patch" in client.get("/?game=diablo-4").get_data(as_text=True)
     assert client.get("/?game=inconnu").status_code == 404
+
+
+def test_old_games_screen_redirects_home(client):
+    resp = client.get("/games")
+    assert resp.status_code == 301 and resp.headers["Location"].endswith("/")
 
 
 def test_patch_detail(client, conn, config):
@@ -53,20 +59,22 @@ def test_toggle_game_requires_csrf(client):
 
 
 def test_toggle_game(client, conn):
-    token = _csrf(client, "/games")
+    token = _csrf(client, "/?game=palworld")
     resp = client.post("/games/palworld/active",
                        data={"active": "0", "csrf_token": token, "next": "//evil.com"})
     assert resp.status_code == 303
-    assert resp.headers["Location"].endswith("/games")  # pas de redirection ouverte
+    assert resp.headers["Location"].endswith("/?game=palworld")  # pas de redirection ouverte
     assert repo.get_game(conn, "palworld")["active"] == 0
     assert client.post("/games/nope/active",
                        data={"active": "1", "csrf_token": token}).status_code == 404
 
 
-def test_inactive_game_hidden_from_feed(client, conn, config):
+def test_unfollowed_game_still_viewable(client, conn, config):
+    # Ne plus suivre un jeu coupe ses notifications, pas l'accès à ses patchs.
     _seed(conn, config)
     repo.set_game_active(conn, "palworld", False)
-    assert "Palworld v0.6.8" not in client.get("/").get_data(as_text=True)
+    html = client.get("/?game=palworld").get_data(as_text=True)
+    assert "Palworld v0.6.8" in html and 'aria-pressed="false"' in html
 
 
 def test_security_headers(client):
@@ -79,7 +87,7 @@ def test_security_headers(client):
 
 def test_no_inline_styles_or_scripts(client, conn, config):
     _seed(conn, config)
-    for path in ["/", "/games", "/settings", "/patch/1"]:
+    for path in ["/", "/?game=palworld", "/settings", "/patch/1"]:
         html = client.get(path).get_data(as_text=True)
         assert "style=" not in html, path
         assert not re.search(r"<script(?![^>]*\bsrc=)", html), path

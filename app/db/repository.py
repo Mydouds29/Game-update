@@ -274,12 +274,13 @@ _FEED_ORDER = " ORDER BY coalesce(p.published_at, p.created_at) DESC, p.id DESC"
 
 
 def feed(conn: sqlite3.Connection, *, game_slug: str | None, limit: int,
-         offset: int) -> list[dict[str, Any]]:
+         offset: int, only_active: bool = True) -> list[dict[str, Any]]:
     sql = (
         "SELECT p.id, p.title, p.version, p.build, p.platforms, p.published_at,"
         " p.published_at_raw, p.created_at, p.updated_at, p.revision,"
         " g.slug AS game_slug, g.name AS game_name, g.short_name AS game_short"
-        " FROM patches p JOIN games g ON g.id = p.game_id WHERE g.active = 1"
+        " FROM patches p JOIN games g ON g.id = p.game_id"
+        + (" WHERE g.active = 1" if only_active else " WHERE 1 = 1")
     )
     args: list[Any] = []
     if game_slug:

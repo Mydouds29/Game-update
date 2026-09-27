@@ -1,12 +1,6 @@
 {% macro icon(name) -%}
-{%- if name == 'feed' -%}
-<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-{%- elif name == 'games' -%}
-<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="11" rx="4"/><path d="M8 11v3M6.5 12.5h3M15 12h.01M17 14h.01"/></svg>
-{%- elif name == 'settings' -%}
+{%- if name == 'settings' -%}
 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
-{%- elif name == 'bell' -%}
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg>
 {%- elif name == 'back' -%}
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
 {%- elif name == 'share' -%}
@@ -33,8 +27,8 @@
 {%- endmacro %}
 
 {% macro app_header() -%}
-<header class="topbar topbar--app">
+<header class="topbar">
   <a class="brand" href="{{ url_for('feed.index') }}">{{ icon('logo') }}<span>GAME UPDATE</span></a>
-  <a class="icon-btn" href="{{ url_for('games.settings') }}" aria-label="Notifications et réglages">{{ icon('bell') }}</a>
+  <a class="icon-btn" href="{{ url_for('games.settings') }}" aria-label="Réglages">{{ icon('settings') }}</a>
 </header>
 {%- endmacro %}

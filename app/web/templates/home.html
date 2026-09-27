@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "_macros.html" import app_header, display_title %}
+{% block title %}{% if game %}{{ game.name }} · {% endif %}Game Update{% endblock %}
+{% block header %}{{ app_header() }}{% endblock %}
+{% block content %}
+<div class="picker">
+  <form class="picker__form" action="{{ url_for('feed.index') }}" method="get">
+    <label class="visually-hidden" for="game">Jeu</label>
+    <select id="game" name="game" data-autosubmit>
+      <option value=""{% if not game %} selected{% endif %} disabled>Choisis un jeu…</option>
+      {% for g in games %}
+      <option value="{{ g.slug }}"{% if game and g.slug == game.slug %} selected{% endif %}>{{ g.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn" type="submit" data-autosubmit-fallback>Voir</button>
+  </form>
+  {% if game %}
+  <form method="post" action="{{ url_for('games.set_active', slug=game.slug) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="active" value="{{ 0 if game.active else 1 }}">
+    <button class="btn" type="submit" aria-pressed="{{ 'true' if game.active else 'false' }}"
+      aria-label="{{ 'Ne plus suivre' if game.active else 'Suivre' }} {{ game.name }}">
+      {{ 'Suivi ✓' if game.active else 'Suivre' }}</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if not games %}
+<p class="empty block-empty">Aucun jeu dans le catalogue.</p>
+{% elif game %}
+<section class="block">
+  {% if patches %}
+  <ul class="list">
+    {% for p in patches %}
+    <li>
+      <a class="row" href="{{ url_for('patch.detail', patch_id=p.id) }}">
+        <span class="row__title">{{ display_title(p) }}</span>
+        <span class="muted small nowrap">{{ p | patch_date }}</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">Aucun patch pour l'instant.</p>
+  {% endif %}
+</section>
+
+{% if page > 1 or has_more %}
+<nav class="pager" aria-label="Pagination">
+  {% if page > 1 %}<a class="btn" href="{{ url_for('feed.index', game=game.slug, page=page - 1) }}">← Plus récents</a>{% else %}<span></span>{% endif %}
+  {% if has_more %}<a class="btn" href="{{ url_for('feed.index', game=game.slug, page=page + 1) }}">Plus anciens →</a>{% endif %}
+</nav>
+{% endif %}
+{% endif %}
+{% endblock %}

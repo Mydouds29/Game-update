@@ -1,4 +1,4 @@
-"""Fil chronologique, feuille de style des tags, fichiers PWA, santé."""
+"""Accueil (menu des jeux et patchs du jeu choisi), feuille de style des tags, fichiers PWA, santé."""
 
 from __future__ import annotations
 
@@ -12,30 +12,33 @@ from ..db import repository as repo
 
 bp = Blueprint("feed", __name__)
 
+
 PAGE_SIZE = 20
 
 
 @bp.get("/")
 def index() -> str:
+    """Menu déroulant des jeux ; le jeu choisi affiche ses patchs en dessous."""
     conn = get_db()
-    game_slug = request.args.get("game") or None
-    games = repo.list_games(conn)
-    active_games = [g for g in games if g["active"]]
-    if game_slug and not any(g["slug"] == game_slug for g in active_games):
-        abort(404, description="Jeu inconnu ou désactivé.")
+    games = sorted(repo.list_games(conn), key=lambda g: g["name"].casefold())
+    game = None
+    patches: list = []
+    has_more = False
+    slug = request.args.get("game")
     try:
         page = max(1, min(int(request.args.get("page", 1)), 500))
     except ValueError:
         page = 1
-    patches = repo.feed(conn, game_slug=game_slug, limit=PAGE_SIZE + 1,
-                        offset=(page - 1) * PAGE_SIZE)
-    has_more = len(patches) > PAGE_SIZE
-    patches = patches[:PAGE_SIZE]
-    latest, older = (patches[0], patches[1:]) if patches and page == 1 else (None, patches)
-    return render_template(
-        "feed.html", games=active_games, game_slug=game_slug, latest=latest,
-        older=older, page=page, has_more=has_more, nav="feed",
-    )
+    if slug:
+        game = repo.get_game(conn, slug)
+        if game is None:
+            abort(404, description="Jeu inconnu.")
+        patches = repo.feed(conn, game_slug=slug, limit=PAGE_SIZE + 1,
+                            offset=(page - 1) * PAGE_SIZE, only_active=False)
+        has_more = len(patches) > PAGE_SIZE
+        patches = patches[:PAGE_SIZE]
+    return render_template("home.html", games=games, game=game, patches=patches,
+                           page=page, has_more=has_more)
 
 
 @bp.get("/tags.css")

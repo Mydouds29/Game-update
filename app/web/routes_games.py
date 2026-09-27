@@ -1,4 +1,4 @@
-"""Gestion des jeux actifs et page Réglages."""
+"""Suivi d'un jeu (notifications) et page Réglages."""
 
 from __future__ import annotations
 
@@ -24,8 +24,9 @@ def _safe_next(default: str) -> str:
 
 
 @bp.get("/games")
-def index() -> str:
-    return render_template("games.html", games=repo.list_games(get_db()), nav="games")
+def index() -> Response:
+    # L'ancien écran « Jeux » est remplacé par le menu déroulant de l'accueil.
+    return redirect(url_for("feed.index"), code=301)
 
 
 @bp.post("/games/<slug>/active")
@@ -37,7 +38,7 @@ def set_active(slug: str) -> Response:
     if not repo.set_game_active(conn, slug, value == "1"):
         abort(404, description="Jeu inconnu.")
     log.info("game.toggled", extra={"game": slug, "active": value == "1"})
-    return redirect(_safe_next(url_for("games.index")), code=303)
+    return redirect(_safe_next(url_for("feed.index", game=slug)), code=303)
 
 
 @bp.get("/settings")
@@ -47,5 +48,5 @@ def settings() -> str:
     masked = (topic[:3] + "…" + topic[-2:]) if len(topic) > 8 else ("…" if topic else "")
     return render_template(
         "settings.html", sources=repo.source_status(get_db()), notifier=cfg.notifier,
-        ntfy_server=cfg.ntfy_server, ntfy_topic_masked=masked, nav="settings",
+        ntfy_server=cfg.ntfy_server, ntfy_topic_masked=masked,
     )
