@@ -98,3 +98,19 @@ def test_news_list_article_failure_does_not_block_others():
                           params={"mode": "news_list", "list_url": list_url})
     result = BlizzardCollector().fetch(source, http)
     assert len(result.patches) == 1
+
+
+def test_accordion_page_one_patch_per_panel():
+    # Format réel de la page Diablo IV : versions dans des blocs repliables, sans titre h1-h4.
+    patches = split_anchored_page(fixture_text("blizzard_d4_accordion.html"), D4_URL)
+    assert [p.version for p in patches] == ["9.1.1", "9.1.0"]
+    first = patches[0]
+    assert first.build == "90002" and first.platforms == "All Platforms"
+    assert first.published_at.date().isoformat() == "2026-10-02"
+    assert first.source_key == "anchor:9.1.1" and first.url == D4_URL + "#9.1.1"
+    patch = normalize(first)
+    texts = [it.text for s in patch.sections for it in s.items]
+    assert len(texts) == 4  # tout le contenu du bloc, rien de plus
+    assert "Fixed an issue where the stash could not be opened." not in texts
+    druid = [it for s in patch.sections for it in s.items if it.subgroup == "Druid"]
+    assert len(druid) == 1

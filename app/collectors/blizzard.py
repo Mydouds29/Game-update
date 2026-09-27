@@ -3,8 +3,9 @@
 Deux modes, choisis par le paramètre ``mode`` de la source :
 
 * ``anchored_page`` : un article unique enrichi à chaque patch,
-  avec un titre par version. La page est découpée par version et chaque
-  version devient un patch distinct ; l'ingestion ne crée que les nouvelles.
+  avec un bloc repliable (``.panel``) ou un titre par version. La page est
+  découpée par version et chaque version devient un patch distinct ;
+  l'ingestion ne crée que les nouvelles.
 * ``news_list`` : une page de liste d'articles ;
   chaque article dont le titre ressemble à une patch note est récupéré.
 """
@@ -128,11 +129,49 @@ def _chunk_between(start: Tag, stop: Tag | None, container: Tag) -> list[Tag]:
     return included
 
 
+def _accordion_panels(container: Tag, page_url: str) -> list[RawPatch]:
+    """Versions rangées dans des blocs repliables (page réelle de Diablo IV) :
+    titre dans ``.panel-title``, contenu dans ``.panel-body``."""
+    patches: list[RawPatch] = []
+    for panel in container.select("div.panel"):
+        title_el = panel.select_one(".panel-title")
+        body_el = panel.select_one(".panel-body")
+        if title_el is None or body_el is None or not is_version_heading(title_el):
+            continue
+        title = title_el.get_text(" ", strip=True)
+        info = parse_heading(title)
+        collapse = panel.select_one(".panel-collapse[id]")
+        anchor = collapse.get("id") if collapse is not None else None
+        if anchor:
+            source_key = f"anchor:{anchor}"
+        elif info["version"] or info["build"]:
+            source_key = f"v:{info['version'] or ''}:b:{info['build'] or ''}"
+        else:
+            source_key = f"h:{_slug(title)}"
+        patches.append(RawPatch(
+            source_key=source_key,
+            title=title,
+            url=f"{page_url}#{anchor}" if anchor else page_url,
+            body=body_el.decode_contents(),
+            body_format="html",
+            published_raw=info["date"],
+            published_at=parse_date(info["date"]),
+            version=info["version"],
+            build=info["build"],
+            platforms=info["platforms"],
+            trusted_patch=True,
+        ))
+    return patches
+
+
 def split_anchored_page(html: str, page_url: str, *,
                         content_selector: str | None = None,
                         max_versions: int = 15) -> list[RawPatch]:
     soup = BeautifulSoup(html, "lxml")
     container = find_content(soup, content_selector)
+    panels = _accordion_panels(container, page_url)
+    if panels:
+        return panels[:max_versions]
     markers = [h for h in container.find_all(HEADING_TAGS) if is_version_heading(h)]
     if not markers:
         raise ParseError("aucun titre de version trouvé dans la page")
