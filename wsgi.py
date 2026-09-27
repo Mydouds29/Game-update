@@ -1,0 +1,9 @@
+"""Point d'entrée WSGI (gunicorn wsgi:app) et CLI (flask --app wsgi ...)."""
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from app import create_app  # noqa: E402
+
+app = create_app()

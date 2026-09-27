@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "game-update"
+version = "0.1.0"
+description = "Agrégateur mobile-first de patch notes de jeux vidéo"
+requires-python = ">=3.11"
+dependencies = [
+    "Flask>=3.1,<4",
+    "requests>=2.32,<3",
+    "beautifulsoup4>=4.12,<5",
+    "lxml>=5.2",
+    "python-dotenv>=1.0,<2",
+    "gunicorn>=23",
+    "tzdata>=2024.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+game-update-worker = "app.scheduler:main"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.setuptools.package-data]
+app = [
+    "catalog.toml",
+    "db/migrations/*.sql",
+    "web/templates/*.html",
+    "web/static/*",
+    "web/static/icons/*",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

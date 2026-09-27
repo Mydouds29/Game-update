@@ -1,0 +1,15 @@
+[Unit]
+Description=Game Update - sauvegarde de la base SQLite
+
+[Service]
+Type=oneshot
+User=gameupdate
+Group=gameupdate
+WorkingDirectory=/opt/game-update
+EnvironmentFile=/etc/game-update/env
+ExecStart=/opt/game-update/.venv/bin/flask --app wsgi backup-db
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/game-update
+UMask=0077

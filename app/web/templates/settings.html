@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "_macros.html" import app_header %}
+{% block title %}Réglages · Game Update{% endblock %}
+{% block header %}{{ app_header() }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Réglages</h1></div>
+
+<section class="block">
+  <h2 class="eyebrow">Notifications</h2>
+  <div class="card">
+    {% if notifier == 'ntfy' %}
+    <p>Envoi via <strong>ntfy</strong> sur <span class="mono">{{ ntfy_server }}</span>, sujet <span class="mono">{{ ntfy_topic_masked }}</span>.</p>
+    <p class="muted small">Sur le téléphone : installe l'appli ntfy, puis abonne-toi à ce serveur et à ce sujet. Une notification part à chaque nouveau patch d'un jeu suivi.</p>
+    {% elif notifier == 'log' %}
+    <p>Les notifications sont seulement écrites dans les journaux (<span class="mono">GU_NOTIFIER=log</span>).</p>
+    {% else %}
+    <p>Notifications désactivées (<span class="mono">GU_NOTIFIER=none</span>).</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="block">
+  <h2 class="eyebrow">État des sources</h2>
+  <ul class="list">
+    {% for s in sources %}
+    <li class="card source-status">
+      <div class="card__row">
+        <strong>{{ s.game_name }} · {{ s.label }}</strong>
+        {% if not s.enabled or not s.active %}
+        <span class="badge">inactive</span>
+        {% elif s.last_status == 'error' %}
+        <span class="badge badge--error">erreur</span>
+        {% elif s.last_status %}
+        <span class="badge badge--ok">ok</span>
+        {% else %}
+        <span class="badge">jamais</span>
+        {% endif %}
+      </div>
+      <div class="mono muted small">Dernier succès : {{ s.last_success_at | fr_datetime }}</div>
+      {% if s.enabled and s.active %}<div class="mono muted small">Prochaine collecte : {{ s.next_fetch_at | fr_datetime }}</div>{% endif %}
+      {% if s.last_status == 'error' and s.last_error %}
+      <div class="mono small error-text">{{ s.consecutive_failures }} échec(s) : {{ s.last_error | truncate(200) }}</div>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

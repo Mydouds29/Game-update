@@ -1,0 +1,4 @@
+{"code": 200, "data": {"list": [
+  {"id": 901, "title": "Version 2.7 Update Notice", "publishTime": 1790000000000, "content": "<h3>New Content</h3><ul><li>Added the Rinascita region expansion.</li></ul><h3>Optimizations</h3><ul><li>Fixed abnormal display of some UI elements.</li></ul>"},
+  {"id": 900, "title": "Version 2.7 Launch Event: Login Rewards", "publishTime": 1789990000000, "content": "<p>Log in to claim rewards.</p>"}
+]}}

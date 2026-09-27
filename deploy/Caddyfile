@@ -1,0 +1,12 @@
+# Variante reverse proxy public avec HTTPS automatique (Let's Encrypt).
+# Avec Tailscale, préférer `tailscale serve` (voir deploy/README.md) et
+# ne pas ouvrir les ports 80/443 au public.
+game-update.example.com {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:8000
+	header -Server
+	log {
+		output file /var/log/caddy/game-update.log
+		format json
+	}
+}

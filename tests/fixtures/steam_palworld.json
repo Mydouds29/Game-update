@@ -1,0 +1,76 @@
+{
+ "appnews": {
+  "appid": 1623730,
+  "newsitems": [
+   {
+    "gid": "5123456789012345601",
+    "title": "Palworld v0.6.8 Patch Notes",
+    "url": "https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/5123456789012345601",
+    "is_external_url": true,
+    "author": "Pocketpair",
+    "contents": "Thank you for playing Palworld!\nWe have released v0.6.8.\n\n[h2]Balance adjustments[/h2]\n[list]\n[*]Increased the attack power of Jetragon by 10%\n[*]Reduced stamina consumption while gliding from 20 to 15\n[/list]\n[h2]Bug fixes[/h2]\n[list]\n[*]Fixed an issue where Pals could fall through the floor of the base\n[*]Fixed a crash when opening the Paldeck on Xbox\n[*]Multiplayer\n[list]\n[*]Fixed a desync when joining a guild base\n[/list]\n[/list]\n[img]{STEAM_CLAN_IMAGE}/12345/abcdef.png[/img]\n[h2]Known issues[/h2]\n[list]\n[*]Some players may experience stuttering on the [PC] version.\n[/list]",
+    "feedlabel": "Community Announcements",
+    "date": 1790150400,
+    "feedname": "steam_community_announcements",
+    "feed_type": 1,
+    "appid": 1623730,
+    "tags": [
+     "patchnotes"
+    ]
+   },
+   {
+    "gid": "5123456789012345602",
+    "title": "Hotfix v0.6.7.1 is now live",
+    "url": "https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/5123456789012345602",
+    "is_external_url": true,
+    "author": "Pocketpair",
+    "contents": "[b]Fixes[/b]\n- Fixed an issue where the game could freeze when loading a world\n- Fixed incorrect item names in the Chinese localization",
+    "feedlabel": "Community Announcements",
+    "date": 1789900000,
+    "feedname": "steam_community_announcements",
+    "feed_type": 1,
+    "appid": 1623730
+   },
+   {
+    "gid": "5123456789012345603",
+    "title": "Palworld is 40% OFF during the Autumn Sale!",
+    "url": "https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/5123456789012345603",
+    "is_external_url": true,
+    "author": "Pocketpair",
+    "contents": "Grab Palworld now at 40% off!",
+    "feedlabel": "Community Announcements",
+    "date": 1789800000,
+    "feedname": "steam_community_announcements",
+    "feed_type": 1,
+    "appid": 1623730
+   },
+   {
+    "gid": "5123456789012345604",
+    "title": "Pal Fest Event: Halloween Costume Contest",
+    "url": "https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/5123456789012345604",
+    "is_external_url": true,
+    "author": "Pocketpair",
+    "contents": "Share your costumes!",
+    "feedlabel": "Community Announcements",
+    "date": 1789700000,
+    "feedname": "steam_community_announcements",
+    "feed_type": 1,
+    "appid": 1623730
+   },
+   {
+    "gid": "5123456789012345605",
+    "title": "Palworld review: one year later",
+    "url": "https://example-press.com/palworld-review",
+    "is_external_url": true,
+    "author": "Press",
+    "contents": "...",
+    "feedlabel": "Example Press",
+    "date": 1789600000,
+    "feedname": "example_press",
+    "feed_type": 0,
+    "appid": 1623730
+   }
+  ],
+  "count": 5
+ }
+}

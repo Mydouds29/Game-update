@@ -1,0 +1,10 @@
+[Unit]
+Description=Sauvegarde quotidienne de Game Update
+
+[Timer]
+OnCalendar=*-*-* 04:17:00
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

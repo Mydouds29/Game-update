@@ -1,0 +1,35 @@
+[Unit]
+Description=Game Update - application web (gunicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gameupdate
+Group=gameupdate
+WorkingDirectory=/opt/game-update
+EnvironmentFile=/etc/game-update/env
+ExecStart=/opt/game-update/.venv/bin/gunicorn -c /opt/game-update/deploy/gunicorn.conf.py wsgi:app
+Restart=on-failure
+RestartSec=5
+
+# Durcissement
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/game-update
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, game_tag, display_title, meta_line %}
+{% block title %}{{ patch.game_name }} · {{ display_title(patch) }}{% endblock %}
+{% block header %}
+<header class="topbar topbar--compact">
+  <a class="back" href="{{ url_for('feed.index') }}">{{ icon('back') }}Fil</a>
+  <div class="actions">
+    <form method="post" action="{{ url_for('games.set_active', slug=patch.game_slug) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="active" value="{{ 0 if patch.game_active else 1 }}">
+      <input type="hidden" name="next" value="{{ url_for('patch.detail', patch_id=patch.id) }}">
+      <button class="btn" type="submit" aria-pressed="{{ 'true' if patch.game_active else 'false' }}"
+        aria-label="{{ 'Ne plus suivre' if patch.game_active else 'Suivre' }} {{ patch.game_name }}">
+        {{ 'Suivi ✓' if patch.game_active else 'Suivre' }}</button>
+    </form>
+    <button class="icon-btn" type="button" data-share hidden aria-label="Partager">{{ icon('share') }}</button>
+  </div>
+</header>
+{% endblock %}
+{% block content %}
+<section class="hero">
+  {{ game_tag(patch.game_slug, patch.game_short | upper) }}
+  <h1>{{ display_title(patch) }}</h1>
+  {% if patch.version and patch.build %}<p class="subtitle">{{ patch.title }}</p>{% endif %}
+  <div class="mono muted small">{{ meta_line(patch, long_date=true) }}</div>
+  {% if patch is announced_ahead %}
+  <p class="notice">Date annoncée par la source ; patch détecté le {{ patch.created_at | fr_date(true) }}.</p>
+  {% endif %}
+  {% if patch.revision > 1 %}
+  <p class="notice">Note mise à jour par la source le {{ patch.updated_at | fr_datetime }}.</p>
+  {% endif %}
+  <dl class="stats">
+    <div><dt>changements</dt><dd class="accent">{{ patch.item_count }}</dd></div>
+    <div><dt>sections</dt><dd>{{ patch.sections | length }}</dd></div>
+    <div><dt>correctifs</dt><dd>{{ patch.fix_count }}</dd></div>
+    {% if patch.balance_count %}<div><dt>équilibrage</dt><dd>{{ patch.balance_count }}</dd></div>{% endif %}
+  </dl>
+</section>
+
+{% if patch.sections | length > 1 %}
+<nav class="section-nav" aria-label="Sections du patch">
+  {% for s in patch.sections %}
+  <a class="chip chip--small" href="#s-{{ s.id }}">{{ s.title }}{% if s.count %} <span class="mono muted">{{ s.count }}</span>{% endif %}</a>
+  {% endfor %}
+</nav>
+{% endif %}
+
+<div class="sections">
+  {% if not patch.sections %}
+  <p class="empty">Le contenu de cette note n'a pas pu être découpé. Consulte la note officielle ci-dessous.</p>
+  {% endif %}
+  {% for s in patch.sections %}
+  <section id="s-{{ s.id }}" class="psection">
+    <h2>{{ s.title }}{% if s.count %}<span class="mono muted">{{ s.count }}</span>{% endif %}</h2>
+    <ul class="items">
+      {% for it in s['items'] %}
+      {% if it.kind == 'note' %}
+      <li class="item item--note">{{ it.text }}</li>
+      {% else %}
+      <li class="item">
+        <span class="kind kind--{{ it.kind }}">{{ {'fix': 'FIX', 'new': 'NEW', 'balance': 'BAL', 'change': 'CHG'}[it.kind] }}</span>
+        <div>
+          {% if it.subgroup %}<span class="subgroup">{{ it.subgroup }}</span>{% endif %}
+          <span class="item__text">{{ it.text }}</span>
+        </div>
+      </li>
+      {% endif %}
+      {% endfor %}
+    </ul>
+  </section>
+  {% endfor %}
+</div>
+
+<footer class="source">
+  <span>Source : {{ patch.source_label }} · récupéré automatiquement le {{ patch.created_at | fr_datetime }}</span>
+  <a href="{{ patch.source_url }}" rel="noopener noreferrer nofollow" target="_blank">Voir la note officielle →</a>
+</footer>
+{% endblock %}

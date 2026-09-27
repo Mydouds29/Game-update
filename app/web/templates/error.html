@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% from "_macros.html" import app_header %}
+{% block title %}Erreur {{ code }} · Game Update{% endblock %}
+{% block header %}{{ app_header() }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Erreur {{ code }}</h1>
+  <p class="muted">{{ message }}</p>
+  <p><a class="btn" href="{{ url_for('feed.index') }}">Retour au fil</a></p>
+</div>
+{% endblock %}
